@@ -281,14 +281,17 @@ class ExportIOMixin:
                 return name
         raise SolidWorksError(f"The part has no standard isometric view among {', '.join(names)}.")
 
-    def make_drawing(self, path: str) -> dict:
+    def make_drawing(self, path: str, template: str | None = None) -> dict:
         """A 2D drawing of the current part, saved as PDF or as an editable .slddrw.
 
-        Front, top and right views in European (first angle) projection plus an
-        isometric view, on an A4 sheet at the scale SolidWorks picks, with the
-        model's own dimensions, each shown once. The drawing refers to the part's
-        file, so the part must have been saved; unsaved changes show in a PDF
-        but not when a saved drawing is opened later.
+        Front, top and right views in GB/T 14692 first-angle projection plus an
+        isometric view, on an A4 sheet (GB/T 14689) at the scale SolidWorks
+        picks, with the model's own dimensions, each shown once. `template` is
+        an optional .drwdot; pass SolidWorks' GB drawing template for a GB
+        title block, or leave it None to use the user's default drawing
+        template. The drawing refers to the part's file, so the part must have
+        been saved; unsaved changes show in a PDF but not when a saved drawing
+        is opened later.
         """
         fmt = os.path.splitext(path)[1].lstrip(".").lower()
         if fmt not in DRAWING_FORMATS:
@@ -297,7 +300,12 @@ class ExportIOMixin:
         part_path = self._model.GetPathName()
         if not part_path:
             raise SolidWorksError("Save the part first (save_part): the drawing refers to its file.")
-        template = self._sw.GetUserPreferenceStringValue(SW_PREF_DEFAULT_TEMPLATE_DRAWING)
+        template = template or self._sw.GetUserPreferenceStringValue(SW_PREF_DEFAULT_TEMPLATE_DRAWING)
+        if not template:
+            raise SolidWorksError(
+                "No drawing template is configured. Pass template=... (for GB, SolidWorks' gb.drwdot) "
+                "or set a default drawing template in SolidWorks."
+            )
         drawing = binding.wrap(self._sw.NewDocument(template, SW_DWG_PAPER_A4, 0.0, 0.0), self._mod.IModelDoc2)
         if drawing is None:
             raise SolidWorksError(f"SolidWorks could not start a drawing from the template '{template}'.")

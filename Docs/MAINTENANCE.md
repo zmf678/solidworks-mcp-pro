@@ -60,6 +60,8 @@ the behaviour genuinely crosses domains.
 
 - `Docs/README.md` is the documentation index.
 - A process change updates `Docs/ENGINEERING.md` and the relevant guide.
+- A standard, tolerance or drawing-convention change updates
+  `Docs/MODELING-STANDARDS.md` and `src/solidworks_mcp/guide.md`.
 - A module/layer change updates `Docs/ARCHITECTURE.md`.
 - A test/CI change updates `Docs/TESTING.md`.
 - A release-process change updates `Docs/RELEASING.md`.

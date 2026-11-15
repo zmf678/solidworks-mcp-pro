@@ -48,15 +48,17 @@ async def screenshot(
 
 
 @mcp.tool()
-async def make_drawing(path: str) -> dict:
+async def make_drawing(path: str, template: str | None = None) -> dict:
     """Make a 2D drawing of the current part: a PDF, or an editable .slddrw.
 
-    Front, top and right views in European (first angle) projection plus an
-    isometric view, on an A4 sheet at the scale SolidWorks picks, with the
-    model's own dimensions, each shown once: a dimensioned sketch to print or
-    send. Save the part first (save_part): the drawing refers to its file.
+    Front, top and right views in GB/T 14692 first-angle projection plus an
+    isometric view, on an A4 sheet (GB/T 14689) at the scale SolidWorks picks,
+    with the model's own dimensions, each shown once: a dimensioned sketch to
+    print or send. template: optional .drwdot; pass SolidWorks' GB drawing
+    template for a GB title block, or leave it None to use the default drawing
+    template. Save the part first (save_part): the drawing refers to its file.
     """
-    return await _call(_session.make_drawing, path)
+    return await _call(_session.make_drawing, path, template)
 
 
 @mcp.tool()

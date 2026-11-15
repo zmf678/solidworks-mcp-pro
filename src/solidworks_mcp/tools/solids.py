@@ -133,7 +133,7 @@ async def add_swept_pipe(
     path_mm = [[x, y], 鈥 in mm is the centreline. Interior corners are rounded
     with bend_radius_mm (required when the path turns; a 2-point straight path
     needs none); smooth=True runs a spline through the points instead, a
-    flowing curve. diameter_mm = outer 脴; the round profile is auto-generated
+    flowing curve. diameter_mm = outer Ø; the round profile is auto-generated
     perpendicular to the path. Returns mass properties (pi r^2 x
     path_length_mm). Use new_part first.
     """

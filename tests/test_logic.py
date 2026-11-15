@@ -334,6 +334,31 @@ def test_wizard_values_follow_what_solidworks_accepts():
     )
 
 
+def test_the_hole_wizard_defaults_to_gb_and_rejects_unknown_standards(s):
+    """GB is the project standard; ISO remains an explicit fallback."""
+    assert s._WIZARD_STANDARDS == {"GB": 13, "ISO": 8}
+    assert s._WIZARD_KINDS == {
+        "clearance": (2, 356),
+        "counterbore": (0, 361),
+        "countersink": (1, 362),
+        "tapped": (4, 359),
+    }
+    assert s._WIZARD_KINDS_ISO == {
+        "clearance": (2, 144),
+        "counterbore": (0, 139),
+        "countersink": (1, 140),
+        "tapped": (4, 147),
+    }
+    assert s._wizard_selection("GB", "clearance") == (13, 2, 356)
+    assert s._wizard_selection("iso", "tapped") == (8, 4, 147)
+    with pytest.raises(SolidWorksError, match="GB.*ISO"):
+        s._wizard_selection("DIN", "clearance")
+    with pytest.raises(SolidWorksError, match="Unknown hole kind"):
+        s._wizard_selection("GB", "spotface")
+    with pytest.raises(SolidWorksError, match="GB.*ISO"):
+        s.add_hole_wizard("clearance", "M3", "+z", 0, 0, 0, standard="DIN")
+
+
 def test_parse_face_selector_rejects_unknown_side(s):
     with pytest.raises(SolidWorksError):
         s._parse_face_selector("+z:middle")

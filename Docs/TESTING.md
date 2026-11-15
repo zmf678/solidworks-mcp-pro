@@ -63,6 +63,8 @@ All four jobs must pass before a PR is merged.
 - Prefer exact geometric expectations and `pytest.approx` only for floating
   point tolerance.
 - A new validation rule needs a positive test and at least one refusal test.
+- Standard selection is pure: `_wizard_selection` is tested for the GB default,
+  the ISO fallback and an unknown standard before SolidWorks is touched.
 
 ### Integration tests
 

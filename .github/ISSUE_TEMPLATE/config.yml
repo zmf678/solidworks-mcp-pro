@@ -3,6 +3,9 @@ contact_links:
   - name: Engineering standards and definition of done
     url: https://github.com/zmf678/solidworks-mcp-pro/blob/main/Docs/ENGINEERING.md
     about: Read the required checks and contribution rules before opening a PR.
+  - name: GB modelling standard
+    url: https://github.com/zmf678/solidworks-mcp-pro/blob/main/Docs/MODELING-STANDARDS.md
+    about: Read the GB default, implementation matrix and non-claims.
   - name: Compatibility guide
     url: https://github.com/zmf678/solidworks-mcp-pro/blob/main/Docs/COMPATIBILITY.md
     about: Check supported versions and run the selftest first.

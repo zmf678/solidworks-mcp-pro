@@ -11,14 +11,14 @@ from ..app import _call, _session, mcp
 async def add_thread(
     size: str, x_mm: float, y_mm: float, z_mm: float, length_mm: float, internal: bool = False, name: str = "Thread"
 ) -> dict:
-    """Cut a real, printable ISO metric thread (SolidWorks' own Thread feature).
+    """Cut a real, printable GB/T 196/197 metric thread (SolidWorks' own Thread feature).
 
     size: e.g. 'M10x1.5', 'M3x0.5', 'M10x1.0' -- checked against SolidWorks'
     thread profiles. (x_mm, y_mm, z_mm) = centre of the circular edge where the
     thread starts: the end face of a rod, or the mouth of a hole (internal=True).
     It runs length_mm into the material, right-handed. External: the rod must
-    have the nominal diameter (M10 -> 脴10). Internal: drill the ISO basic minor
-    diameter first, D - 1.0825*P (M10x1.5 -> 脴8.376). Returns mass properties
+    have the nominal diameter (M10 -> Ø10). Internal: drill the GB/T 196 basic minor
+    diameter first, D - 1.0825*P (M10x1.5 -> Ø8.376). Returns mass properties
     and the thread's size, pitch and diameters.
     """
     return await _call(_session.add_thread, size, x_mm, y_mm, z_mm, length_mm, internal, name)
@@ -92,17 +92,22 @@ async def add_hole_wizard(
     fit: str = "normal",
     thread: str = "cosmetic",
     name: str | None = None,
+    standard: str = "GB",
 ) -> dict:
-    """An ISO hole from SolidWorks' Hole Wizard, sized by its standard tables.
+    """A GB (default) or ISO hole from SolidWorks' Hole Wizard.
 
-    kind: 'clearance' (ISO 273), 'counterbore' (socket head cap screw),
-    'countersink' (socket countersunk screw) or 'tapped'; size e.g. 'M3'.
-    Centred at (x, y, z) mm on the face through that point; through all, or
-    depth_mm deep. fit: 'close' / 'normal' / 'loose'. For tapped holes
-    thread='modeled' cuts a real, printable ISO thread instead of SolidWorks'
-    cosmetic one. Returns the standard's sizes in `hole` and mass properties.
+    standard='GB' (default) uses GB/T 5277 clearance, GB/T 70.1 socket head
+    cap, GB/T 70.3 countersunk socket head and GB tapped-hole tables;
+    standard='ISO' uses the ISO 273/4762/10642 tables. kind: 'clearance',
+    'counterbore', 'countersink' or 'tapped'; size e.g. 'M3'. Centred at
+    (x, y, z) mm on the face through that point; through all, or depth_mm deep.
+    fit: 'close' / 'normal' / 'loose'. For tapped holes thread='modeled' cuts a
+    real, printable metric thread instead of SolidWorks' cosmetic one. Returns
+    the standard's sizes in `hole` and mass properties.
     """
-    return await _call(_session.add_hole_wizard, kind, size, face, x_mm, y_mm, z_mm, depth_mm, fit, thread, name)
+    return await _call(
+        _session.add_hole_wizard, kind, size, face, x_mm, y_mm, z_mm, depth_mm, fit, thread, name, standard
+    )
 
 
 @mcp.tool()

@@ -7,12 +7,21 @@ All notable changes to this project are documented here. This project follows
 
 ### Added
 - Public documentation set: `Docs/README.md` index, `Docs/TESTING.md`,
-  `Docs/RELEASING.md`, `Docs/COMPATIBILITY.md`, `Docs/MAINTENANCE.md` and
-  issue-template contact links.
+  `Docs/RELEASING.md`, `Docs/COMPATIBILITY.md`, `Docs/MAINTENANCE.md`,
+  `Docs/MODELING-STANDARDS.md` and issue-template contact links.
 - A `main-protection` ruleset requiring the four CI jobs and a pull request
   before merging; deletion and force-push of `main` are blocked.
+- `make_drawing(path, template=...)` accepts a drawing template; pass a GB
+  `.drwdot` for a GB title block.
 
 ### Changed
+- **GB is now the default modelling and drawing standard.** `add_hole_wizard`
+  uses SolidWorks' GB tables by default (GB/T 5277 clearance, GB/T 70.1
+  counterbore, GB/T 70.3 countersink, GB tapped holes); pass `standard="ISO"`
+  for the previous ISO 273/4762/10642 tables. Drawings use GB/T 14692
+  first-angle views and GB/T 14689 A4 sheets.
+- Thread documentation now refers to GB/T 196/197 metric threads; the metric
+  designation and basic profile are unchanged.
 - Split the 6,646-line `session.py` (346 methods) into a `session/` package of
   23 domain mixins. `SolidWorksSession` keeps the same public class, method names
   and behaviour; method bodies were moved verbatim.

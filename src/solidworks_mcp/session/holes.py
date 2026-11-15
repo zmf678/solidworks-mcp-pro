@@ -1,4 +1,4 @@
-"""Holes, counterbores, modeled ISO threads and Hole Wizard standards.
+"""Holes, counterbores, modeled GB/ISO metric threads and Hole Wizard standards.
 
 Part of the :class:`SolidWorksSession` mixin split. Every method here must
 run on the COM worker thread (see :mod:`solidworks_mcp.com_worker`).
@@ -18,7 +18,6 @@ from ..constants import (
     SW_START_SKETCH_PLANE,
     SW_THREAD_END_BLIND,
     SW_THREAD_METHOD_CUT,
-    SW_WZD_STANDARD_ISO,
     THREAD_PROFILE_EXTERNAL,
     THREAD_PROFILE_INTERNAL,
 )
@@ -27,7 +26,7 @@ from ..units import m_to_mm, mm_to_m
 
 
 class HolesMixin:
-    """Holes, counterbores, modeled ISO threads and Hole Wizard standards."""
+    """Holes, counterbores, modeled GB/ISO metric threads and Hole Wizard standards."""
 
     def _cut_circle_on_z(
         self, model, diameter_mm: float, x_mm: float, y_mm: float, through: bool, depth_mm: float = 0.0
@@ -154,15 +153,17 @@ class HolesMixin:
 
     @staticmethod
     def _parse_thread_size(size) -> tuple:
-        """(diameter, pitch) in mm from an ISO metric size like 'M10x1.5'; pure."""
+        """(diameter, pitch) in mm from a GB/ISO metric size like 'M10x1.5'; pure."""
         match = re.fullmatch(r"M(\d+(?:\.\d+)?)x(\d+(?:\.\d+)?)", str(size))
         if not match:
-            raise SolidWorksError(f"Unknown thread size '{size}'. Use ISO metric notation like 'M10x1.5' or 'M3x0.5'.")
+            raise SolidWorksError(
+                f"Unknown thread size '{size}'. Use GB/ISO metric notation like 'M10x1.5' or 'M3x0.5'."
+            )
         return float(match.group(1)), float(match.group(2))
 
     @staticmethod
     def _thread_minor_diameter(diameter_mm, pitch_mm) -> float:
-        """ISO basic minor diameter D1 = D - 2 * 5*sqrt(3)/16 * P (ISO 724); pure."""
+        """GB/T 196 basic minor diameter D1 = D - 2 * 5*sqrt(3)/16 * P (ISO 724); pure."""
         return diameter_mm - 5 * math.sqrt(3) / 8 * pitch_mm
 
     def _circular_edges_at(self, x_mm, y_mm, z_mm) -> list:
@@ -191,14 +192,14 @@ class HolesMixin:
         internal: bool = False,
         name: str = "Thread",
     ) -> dict:
-        """Cut a real (printable) ISO metric thread with SolidWorks' Thread feature.
+        """Cut a real (printable) GB/T 196/197 metric thread with SolidWorks' Thread feature.
 
-        size: ISO metric as SolidWorks names it, e.g. 'M10x1.5', 'M3x0.5', 'M10x1.0'.
+        size: GB/ISO metric as SolidWorks names it, e.g. 'M10x1.5', 'M3x0.5', 'M10x1.0'.
         (x_mm, y_mm, z_mm): centre of the circular edge where the thread starts --
         the end face of a rod (external) or the mouth of a hole (internal); the
         thread runs length_mm into the material, right-handed.
         External: the rod must have the nominal diameter (M10 -> Ø10).
-        Internal: the hole must have the ISO basic minor diameter D - 1.0825*P
+        Internal: the hole must have the GB/T 196 basic minor diameter D - 1.0825*P
         (M10x1.5 -> Ø8.376). SolidWorks shifts a tapped thread with the hole, so
         any other hole would give a wrong thread and is refused.
         """
@@ -217,7 +218,7 @@ class HolesMixin:
             )
         edge, radius = min(edges, key=lambda e: abs(2 * e[1] - needed))
         if abs(2 * radius - needed) > self._THREAD_DIAMETER_TOLERANCE_MM:
-            hint = " Drill that ISO basic minor diameter first." if internal else ""
+            hint = " Drill that GB/T 196 basic minor diameter first." if internal else ""
             raise SolidWorksError(
                 f"An {'internal' if internal else 'external'} {size} thread needs a Ø{needed:.3f} "
                 f"{what}, but the edge at ({x_mm:g}, {y_mm:g}, {z_mm:g}) is Ø{2 * radius:.3f}.{hint}"
@@ -290,7 +291,7 @@ class HolesMixin:
     def _coarse_thread_size(self, size: str) -> str:
         """'M3' -> 'M3x0.5': the coarse (largest) pitch the Metric Tap library has."""
         if not re.fullmatch(r"M\d+(?:\.\d+)?", str(size)):
-            raise SolidWorksError(f"A modeled thread needs an ISO metric size like 'M3' (got '{size}').")
+            raise SolidWorksError(f"A modeled thread needs a GB/ISO metric size like 'M3' (got '{size}').")
         feat_mgr = binding.wrap(self._model.FeatureManager, self._mod.IFeatureManager)
         data = binding.wrap(feat_mgr.CreateDefinition(SW_FM_SWEEP_THREAD), self._mod.IThreadFeatureData)
         if data is None:
@@ -361,14 +362,14 @@ class HolesMixin:
             model.ClearSelection2(True)
             sk.InsertSketch(True)  # leave the position sketch
 
-    def _wizard_hole_info(self, feat, kind: str, size: str, fit: str) -> dict:
+    def _wizard_hole_info(self, feat, kind: str, size: str, fit: str, standard: str) -> dict:
         """The sizes SolidWorks took from its standard table for this hole (mm, degrees)."""
         data = binding.wrap(feat.GetDefinition(), self._mod.IWizardHoleFeatureData2)
 
         def mm(value):
             return round(m_to_mm(value), 4)
 
-        info = {"standard": "ISO", "kind": kind, "size": size}
+        info = {"standard": standard, "kind": kind, "size": size}
         if kind == "tapped":
             info.update(
                 tap_drill_diameter_mm=mm(data.TapDrillDiameter or data.ThruTapDrillDiameter),
@@ -387,6 +388,17 @@ class HolesMixin:
             )
         return info
 
+    def _wizard_selection(self, standard: str, kind: str) -> tuple[int, int, int]:
+        """(standard index, hole type, fastener type) for a Hole Wizard call; pure."""
+        standard_key = str(standard).strip().upper()
+        if standard_key not in self._WIZARD_STANDARDS:
+            raise SolidWorksError(f"Unknown hole standard '{standard}'. Use 'GB' or 'ISO'.")
+        kinds = self._WIZARD_KINDS if standard_key == "GB" else self._WIZARD_KINDS_ISO
+        if kind not in kinds:
+            raise SolidWorksError(f"Unknown hole kind '{kind}'. Use one of {sorted(kinds)}.")
+        hole_type, fastener = kinds[kind]
+        return self._WIZARD_STANDARDS[standard_key], hole_type, fastener
+
     def add_hole_wizard(
         self,
         kind: str,
@@ -399,23 +411,26 @@ class HolesMixin:
         fit: str = "normal",
         thread: str = "cosmetic",
         name: str | None = None,
+        standard: str = "GB",
     ) -> dict:
-        """An ISO hole from SolidWorks' Hole Wizard, sized by its standard tables.
+        """A GB (default) or ISO hole from SolidWorks' Hole Wizard.
 
-        kind: 'clearance' (ISO 273), 'counterbore' (socket head cap screw,
-        ISO 4762), 'countersink' (socket countersunk screw, ISO 10642) or
-        'tapped'. size: ISO metric, e.g. 'M3'. Centred at 3D point (x, y, z) on
-        the face through it (as add_hole_on_face); through all, or depth_mm deep
-        (a blind hole ends in a 118 degree drill point). fit: 'close', 'normal'
-        or 'loose' (not for tapped). thread (tapped only): 'cosmetic' drills the
-        ISO tap drill and adds SolidWorks' cosmetic thread; 'modeled' drills the
-        ISO basic minor diameter and cuts a real, printable thread over the
-        standard thread depth (all the way through a through hole). Returns the
-        standard's sizes in `hole`, and the position as dimensions x/y.
+        standard: 'GB' (default) uses GB/T 5277 clearance, GB/T 70.1 socket
+        head cap, GB/T 70.3 countersunk socket head and GB tapped-hole tables;
+        'ISO' uses ISO 273, ISO 4762, ISO 10642 and the ISO tapped-hole table.
+        kind: 'clearance', 'counterbore', 'countersink' or 'tapped'. size:
+        metric, e.g. 'M3'. Centred at 3D point (x, y, z) on the face through it
+        (as add_hole_on_face); through all, or depth_mm deep (a blind hole ends
+        in a 118 degree drill point). fit: 'close', 'normal' or 'loose' (not for
+        tapped). thread (tapped only): 'cosmetic' drills the standard tap drill
+        and adds SolidWorks' cosmetic thread; 'modeled' drills the basic minor
+        diameter and cuts a real, printable thread over the standard thread
+        depth (all the way through a through hole). Returns the standard's
+        sizes in `hole` (`standard` says GB or ISO), and the position as
+        dimensions x/y.
         """
-        model = self._require_model()
-        if kind not in self._WIZARD_KINDS:
-            raise SolidWorksError(f"Unknown hole kind '{kind}'. Use one of {sorted(self._WIZARD_KINDS)}.")
+        standard_key = str(standard).strip().upper()
+        standard_index, hole_type, fastener = self._wizard_selection(standard, kind)
         if fit not in SCREW_FITS:
             raise SolidWorksError(f"Unknown fit '{fit}'. Use one of {sorted(SCREW_FITS)}.")
         if thread not in self._WIZARD_THREADS:
@@ -424,6 +439,7 @@ class HolesMixin:
             raise SolidWorksError("A modeled thread needs kind='tapped'.")
         if depth_mm is not None and depth_mm <= 0:
             raise SolidWorksError(f"depth must be > 0 (got {depth_mm}).")
+        model = self._require_model()
         point = (x_mm, y_mm, z_mm)
         coarse = self._coarse_thread_size(size) if thread == "modeled" else None
         diameter_m = -1.0  # from the standard
@@ -449,12 +465,11 @@ class HolesMixin:
             *start, *(-n for n in normal), mm_to_m(self._ON_FACE_TOLERANCE_MM), SW_SEL_FACES, False, 0, 0
         ):
             raise SolidWorksError(f"Could not pick the {face} face at ({x_mm:g}, {y_mm:g}, {z_mm:g}) mm.")
-        hole_type, fastener = self._WIZARD_KINDS[kind]
         through = depth_mm is None
         feat_mgr = binding.wrap(model.FeatureManager, self._mod.IFeatureManager)
         feat = feat_mgr.HoleWizard5(
             hole_type,
-            SW_WZD_STANDARD_ISO,
+            standard_index,
             fastener,
             size,
             SW_END_COND_THROUGH_ALL if through else SW_END_COND_BLIND,
@@ -472,12 +487,12 @@ class HolesMixin:
         )
         if feat is None:
             raise SolidWorksError(
-                f"The Hole Wizard made no {kind} hole of size '{size}'. Is it an ISO metric size "
-                f"in SolidWorks' table (e.g. 'M3', 'M4', 'M10'), with material at the point?"
+                f"The Hole Wizard made no {kind} hole of size '{size}' in the {standard_key} table. "
+                f"Is it a {standard_key} metric size (e.g. 'M3', 'M4', 'M10'), with material at the point?"
             )
         feat = binding.wrap(feat, self._mod.IFeature)
         dims, fully_defined = self._pin_wizard_position(feat, point)
-        info = self._wizard_hole_info(feat, kind, size, fit)
+        info = self._wizard_hole_info(feat, kind, size, fit, standard_key)
         result = self._finish_feature(feat, name or feat.Name, dimensions=dims, fully_defined=fully_defined, hole=info)
         if coarse:
             radius = m_to_mm(diameter_m) / 2

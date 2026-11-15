@@ -4,6 +4,10 @@ from ..constants import (
     SW_DOC_ASSEMBLY,
     SW_DOC_DRAWING,
     SW_DOC_PART,
+    SW_GB_SCREW_CLEARANCES,
+    SW_GB_SOCKET_COUNTERSUNK,
+    SW_GB_SOCKET_HEAD_CAP,
+    SW_GB_TAPPED_HOLE,
     SW_ISO_SCREW_CLEARANCES,
     SW_ISO_SOCKET_COUNTERSUNK,
     SW_ISO_SOCKET_HEAD_CAP,
@@ -11,6 +15,8 @@ from ..constants import (
     SW_WZD_COUNTERBORE,
     SW_WZD_COUNTERSINK,
     SW_WZD_HOLE,
+    SW_WZD_STANDARD_GB,
+    SW_WZD_STANDARD_ISO,
     SW_WZD_TAP,
 )
 
@@ -52,11 +58,20 @@ class SessionConstants:
     _THREAD_DIAMETER_TOLERANCE_MM = 0.01
 
     _WIZARD_KINDS = {
+        "clearance": (SW_WZD_HOLE, SW_GB_SCREW_CLEARANCES),
+        "counterbore": (SW_WZD_COUNTERBORE, SW_GB_SOCKET_HEAD_CAP),
+        "countersink": (SW_WZD_COUNTERSINK, SW_GB_SOCKET_COUNTERSUNK),
+        "tapped": (SW_WZD_TAP, SW_GB_TAPPED_HOLE),
+    }
+
+    _WIZARD_KINDS_ISO = {
         "clearance": (SW_WZD_HOLE, SW_ISO_SCREW_CLEARANCES),
         "counterbore": (SW_WZD_COUNTERBORE, SW_ISO_SOCKET_HEAD_CAP),
         "countersink": (SW_WZD_COUNTERSINK, SW_ISO_SOCKET_COUNTERSUNK),
         "tapped": (SW_WZD_TAP, SW_ISO_TAPPED_HOLE),
     }
+
+    _WIZARD_STANDARDS = {"GB": SW_WZD_STANDARD_GB, "ISO": SW_WZD_STANDARD_ISO}
 
     _WIZARD_THREADS = ("cosmetic", "modeled")
 
