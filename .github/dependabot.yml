@@ -9,3 +9,7 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 5
+    ignore:
+      # mcp 2.x renamed FastMCP; the server imports mcp.server.fastmcp.
+      - dependency-name: "mcp"
+        update-types: ["version-update:semver-major"]
