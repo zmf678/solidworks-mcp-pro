@@ -6,7 +6,7 @@
 |---|---|---|
 | Operating system | Windows | COM automation; the server starts on other platforms but tool calls fail loud |
 | SOLIDWORKS | 2026 (3DEXPERIENCE R2026x) tested | API calls used exist since SOLIDWORKS 2020 SP2, but 2020–2025 are untested |
-| Python | 3.11+ | CI runs 3.12; upstream development used 3.13 |
+| Python | 3.11+ | Local validation used 3.12; CI uses the runner's available 3.11+ interpreter |
 | MCP SDK | `mcp>=1.26,<2` | `mcp` 2.x renamed `FastMCP`; a migration is required before relaxing the pin |
 | pywin32 | `>=306` (Windows only) | Installed by the `sys_platform == 'win32'` marker |
 | Part template | Y-up | Z-up templates are refused with an actionable message |
