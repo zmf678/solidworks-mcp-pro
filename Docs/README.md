@@ -9,6 +9,7 @@ are for contributors, reviewers and maintainers.
 | Document | Audience | What it covers |
 |---|---|---|
 | [`ENGINEERING.md`](ENGINEERING.md) | everyone | Non-negotiable principles, required checks, definition of done, module boundaries, testing and release standards |
+| [`MODELING-STANDARDS.md`](MODELING-STANDARDS.md) | everyone | GB modelling and drawing standard, normative basis, implementation matrix, non-claims |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | contributors | Request flow, layer responsibilities, session mixin composition, state ownership, adding a tool |
 | [`TESTING.md`](TESTING.md) | contributors | Unit/integration layers, commands, markers, coverage, CI matrix, writing tests |
 | [`RELEASING.md`](RELEASING.md) | maintainers | Versioning, changelog, release checklist, tag/release process, fork publish policy |
@@ -30,6 +31,8 @@ The fork relationship and upstream sync procedure are in
   `src/solidworks_mcp/guide.md`.
 - A process change updates `ENGINEERING.md` and the relevant guide.
 - A module split or new layer updates `ARCHITECTURE.md`.
+- A standard, tolerance or drawing-convention change updates
+  `MODELING-STANDARDS.md` and `src/solidworks_mcp/guide.md`.
 - A test/CI change updates `TESTING.md`.
 - A release-process change updates `RELEASING.md`.
 - Keep code identifiers in backticks and paths relative to the repository root.

@@ -1170,10 +1170,11 @@ def test_list_dimensions_names_every_dimension_with_its_value(part):
     assert all(d["driving"] for d in listed.values())
 
 
-# --- Hole Wizard: SolidWorks' own ISO tables ------------------------------------
-# A 40 x 20 x 10 block, holes from its top face at (20, 10). Clearances follow
-# ISO 273, tap drills ISO 2306; counterbore/countersink sizes are SolidWorks'
-# ISO tables for socket head (ISO 4762) and countersunk (ISO 10642) screws.
+# --- Hole Wizard: SolidWorks' own GB tables (ISO fallback) ----------------------
+# A 40 x 20 x 10 block, holes from its top face at (20, 10). Default is GB:
+# clearances follow GB/T 5277, tap drills the GB metric table; counterbore and
+# countersink sizes are SolidWorks' GB tables for GB/T 70.1 and GB/T 70.3 screws.
+# Pass standard="ISO" for the ISO 273/4762/10642 tables.
 
 
 def _drill_point(d):
@@ -1183,11 +1184,19 @@ def _drill_point(d):
 
 
 @pytest.mark.parametrize("fit,d", [("close", 3.2), ("normal", 3.4), ("loose", 3.6)])
-def test_wizard_clearance_hole_follows_iso_273(part, fit, d):
+def test_wizard_clearance_hole_follows_gb_t_5277(part, fit, d):
     part.add_box(40, 20, 10)
     hole = part.add_hole_wizard("clearance", "M3", "+z", 20, 10, 10, fit=fit)
-    assert hole["hole"]["diameter_mm"] == pytest.approx(d), f"an ISO 273 {fit} M3 clearance hole is Ø{d}"
+    assert hole["hole"]["standard"] == "GB"
+    assert hole["hole"]["diameter_mm"] == pytest.approx(d), f"a GB/T 5277 {fit} M3 clearance hole is Ø{d}"
     assert abs(8000 - vol(hole) - math.pi * (d / 2) ** 2 * 10) < 0.01
+
+
+def test_wizard_iso_fallback_is_explicit(part):
+    part.add_box(40, 20, 10)
+    hole = part.add_hole_wizard("clearance", "M3", "+z", 20, 10, 10, standard="ISO")
+    assert hole["hole"]["standard"] == "ISO"
+    assert hole["hole"]["diameter_mm"] == pytest.approx(3.4)
 
 
 def test_wizard_blind_clearance_hole_ends_in_a_drill_point(part):
@@ -1223,18 +1232,19 @@ def test_wizard_countersink_for_a_countersunk_screw(part):
     assert abs(8000 - vol(hole) - (math.pi * 1.7**2 * 10 + cone)) < 0.01
 
 
-def test_wizard_tapped_hole_uses_the_iso_tap_drill(part):
+def test_wizard_tapped_hole_uses_the_gb_tap_drill(part):
     part.add_box(40, 20, 10)
     hole = part.add_hole_wizard("tapped", "M3", "+z", 20, 10, 10, depth_mm=8)
     info = hole["hole"]
+    assert info["standard"] == "GB"
     assert (info["tap_drill_diameter_mm"], info["thread_depth_mm"]) == pytest.approx((2.5, 6.0))
     assert info["cosmetic_thread"] is True
     assert abs(8000 - vol(hole) - (math.pi * 1.25**2 * 8 + _drill_point(2.5))) < 0.01
 
 
 def test_wizard_tapped_hole_with_a_modeled_thread(part):
-    # printable: the hole is drilled at the ISO basic minor diameter and the
-    # Thread feature cuts the bolt's tooth over the standard thread depth (2D)
+    # printable: the hole is drilled at the GB/T 196 basic minor diameter and
+    # the Thread feature cuts the bolt's tooth over the standard thread depth (2D)
     part.add_box(40, 20, 10)
     hole = part.add_hole_wizard("tapped", "M3", "+z", 20, 10, 10, depth_mm=8, thread="modeled")
     d1 = 3 - 1.0825318 * 0.5

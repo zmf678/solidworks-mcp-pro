@@ -26,6 +26,10 @@ the codebase easier to change, review and release.
    It makes no network calls and stores no credentials.
 7. **Small, explicit modules.** A module has one reason to change. If a module
    grows past roughly 600 lines or takes on a second domain, split it.
+8. **GB is the default modelling and drawing standard.** Millimetres, first-angle
+   projection, GB hole/thread tables and GB drawing templates where supplied.
+   ISO remains an explicit fallback (`standard="ISO"`); the mapping and
+   non-claims are in [`MODELING-STANDARDS.md`](MODELING-STANDARDS.md).
 
 ## 2. Required checks
 
@@ -169,6 +173,7 @@ lower the floor to make a change pass.
 | `README.md` | user-facing install, tool overview, quickstart |
 | `Docs/README.md` | documentation index |
 | `Docs/ENGINEERING.md` | standards and definition of done |
+| `Docs/MODELING-STANDARDS.md` | GB modelling and drawing standard, mapping and non-claims |
 | `Docs/ARCHITECTURE.md` | layers, request flow, module map |
 | `Docs/TESTING.md` | test layers, commands, CI coverage |
 | `Docs/RELEASING.md` | versioning and release process |

@@ -10,6 +10,7 @@
 | MCP SDK | `mcp>=1.26,<2` | `mcp` 2.x renamed `FastMCP`; a migration is required before relaxing the pin |
 | pywin32 | `>=306` (Windows only) | Installed by the `sys_platform == 'win32'` marker |
 | Part template | Y-up | Z-up templates are refused with an actionable message |
+| Modelling standard | GB default; ISO explicit fallback | See `Docs/MODELING-STANDARDS.md` |
 | Units | mm and degrees at the tool boundary | Converted to metres/radians inside the COM layer |
 
 ## Selftest

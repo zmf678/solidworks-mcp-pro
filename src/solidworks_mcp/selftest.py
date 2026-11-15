@@ -75,11 +75,13 @@ def _check_cylinder(sw):
 
 def _check_hole_wizard(sw):
     _block(sw)
-    hole = sw.add_hole_wizard("clearance", "M3", "+z", 20, 10, 10)
+    hole = sw.add_hole_wizard("clearance", "M3", "+z", 20, 10, 10, standard="GB")
     diameter = hole["hole"]["diameter_mm"]
+    if hole["hole"]["standard"] != "GB":
+        raise CheckFailed(f"the Hole Wizard reported standard {hole['hole']['standard']!r}, not GB")
     if abs(diameter - 3.4) > 1e-6:
-        raise CheckFailed(f"an ISO 273 normal M3 clearance hole is 3.4 mm; the Hole Wizard drilled {diameter} mm")
-    return f"{_volume(hole, BLOCK_MM3 - math.pi * 1.7**2 * 10)}, diameter {diameter} mm"
+        raise CheckFailed(f"a GB/T 5277 normal M3 clearance hole is 3.4 mm; the Hole Wizard drilled {diameter} mm")
+    return f"{_volume(hole, BLOCK_MM3 - math.pi * 1.7**2 * 10)}, diameter {diameter} mm (GB)"
 
 
 def _check_thread(sw):
@@ -90,8 +92,10 @@ def _check_thread(sw):
     removed = rod - sw.add_thread("M10x1.5", 0, 0, 40, 20)["mass_properties"]["volume_mm3"]
     expected = 20 * _iso_groove_mm3_per_mm(10, 1.5, 1.5 / 4, 7 * 1.5 / 8)
     if abs(removed - expected) > 0.01 * expected:
-        raise CheckFailed(f"the thread removed {removed:.3f} mm3; an ISO M10x1.5 groove over 20 mm is {expected:.3f}")
-    return f"removed {removed:.3f} mm3 (ISO groove {expected:.3f})"
+        raise CheckFailed(
+            f"the thread removed {removed:.3f} mm3; a GB/T 196/197 M10x1.5 metric groove over 20 mm is {expected:.3f}"
+        )
+    return f"removed {removed:.3f} mm3 (GB metric groove {expected:.3f})"
 
 
 def _check_material(sw):
@@ -157,8 +161,8 @@ CHECKS = [
     ("blind hole in a side face", _check_side_hole),
     ("fillet the vertical edges", _check_fillet),
     ("cylinder (revolve)", _check_cylinder),
-    ("Hole Wizard: ISO M3 clearance hole", _check_hole_wizard),
-    ("thread M10x1.5 (Thread feature)", _check_thread),
+    ("Hole Wizard: GB/T 5277 M3 clearance hole", _check_hole_wizard),
+    ("thread M10x1.5 (GB/T 196/197 metric, Thread feature)", _check_thread),
     ("material 6061 Alloy", _check_material),
     ("mirror a hole about the Right plane", _check_mirror),
     ("engrave text (sketch text and fonts)", _check_text),

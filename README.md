@@ -3,7 +3,9 @@
 > **Engineering-hardened fork.** This repository is a fork of
 > [`hjbaard/SolidWorks-MCP`](https://github.com/hjbaard/SolidWorks-MCP), focused on
 > modular architecture, reproducible development and CI. The modelling engine and
-> tool surface come from upstream; method bodies are unchanged. See
+> tool surface come from upstream; method bodies are unchanged. The default
+> modelling and drawing standard is **GB** (Chinese national standards), with ISO
+> as an explicit fallback. See [`Docs/MODELING-STANDARDS.md`](Docs/MODELING-STANDARDS.md),
 > [`Docs/ENGINEERING.md`](Docs/ENGINEERING.md),
 > [`Docs/ARCHITECTURE.md`](Docs/ARCHITECTURE.md) and
 > [`UPSTREAM.md`](UPSTREAM.md).
@@ -22,7 +24,7 @@ it "looks about right".
 
 <p align="center">
   <img src="Docs/images/bracket.png" width="32%" alt="3D-print mounting bracket with counterbored holes, bolt circle and cable slot">
-  <img src="Docs/images/thread.png" width="32%" alt="M10 bolt with a real, printable ISO metric thread">
+  <img src="Docs/images/thread.png" width="32%" alt="M10 bolt with a real, printable GB/T 196/197 metric thread">
   <img src="Docs/images/vase.png" width="32%" alt="Revolved and shelled vase">
 </p>
 <p align="center">
@@ -41,7 +43,7 @@ it "looks about right".
   by role (`width@Sketch1`), so the part stays editable, in SolidWorks or
   through the agent.
 - **Real CAD, not just primitives.** Extrude, revolve, sweep, loft and splines;
-  holes, counterbores, slots and pockets on any face; rounded polygon corners; ISO holes from the Hole Wizard; real ISO metric threads;
+  holes, counterbores, slots and pockets on any face; rounded polygon corners; GB-standard holes from the Hole Wizard (ISO fallback); real GB/T 196/197 metric threads;
   fillets, chamfers, shells, patterns, mirrors, ribs, equations and materials. Assemblies
   with mates and interference checks. STEP/STL/3MF export and screenshots.
   Engraved and embossed text. Work on existing parts: list, delete, suppress and reorder features; read, extrude and cut a person's sketches; import STEP. Colours per part or component. Joints with concentric and angle mates, checked over their range. Printability checks and dimensioned drawings. Planes at any offset or angle. Several bodies per part, combined and split. Variable fillets and full rounds. Free sketches with tangent arcs and splines. 88 tools in total.
@@ -149,6 +151,7 @@ may still change. See [CHANGELOG.md](https://github.com/hjbaard/SolidWorks-MCP/b
 |---|---|---|
 | [`Docs/README.md`](Docs/README.md) | everyone | Documentation index |
 | [`Docs/ENGINEERING.md`](Docs/ENGINEERING.md) | contributors | Standards, definition of done, module boundaries |
+| [`Docs/MODELING-STANDARDS.md`](Docs/MODELING-STANDARDS.md) | everyone | GB modelling/drawing standard, mapping, non-claims |
 | [`Docs/ARCHITECTURE.md`](Docs/ARCHITECTURE.md) | contributors | Request flow, layers, mixin composition, adding a tool |
 | [`Docs/TESTING.md`](Docs/TESTING.md) | contributors | Test layers, commands, coverage, CI matrix |
 | [`Docs/RELEASING.md`](Docs/RELEASING.md) | maintainers | Versioning, changelog, release and hotfix process |
@@ -246,9 +249,9 @@ The server speaks MCP over **stdio**.
 | `add_extruded_spline(points_mm, depth_mm, name)` | Extrude a smooth closed spline through points (free-form/organic outlines) |
 | `add_hole(diameter_mm, x_mm, y_mm, name)` | Cut a circular through-hole at (x, y) through the depth axis |
 | `add_counterbore_hole(clearance_diameter_mm, cbore_diameter_mm, cbore_depth_mm, x_mm, y_mm, name)` | Counterbored screw hole (flush cap-head / heat-set insert) on +Z |
-| `add_thread(size, x_mm, y_mm, z_mm, length_mm, internal, name)` | Real, printable ISO metric thread (e.g. `M10x1.5`) from a rod's end edge or a hole's mouth, via SolidWorks' Thread feature; the size is checked against the thread profiles. Internal: drill the basic minor diameter first (M10x1.5 → Ø8.376) |
+| `add_thread(size, x_mm, y_mm, z_mm, length_mm, internal, name)` | Real, printable GB/T 196/197 metric thread (e.g. `M10x1.5`; the metric designation is the same as ISO) from a rod's end edge or a hole's mouth, via SolidWorks' Thread feature; the size is checked against the thread profiles. Internal: drill the basic minor diameter first (M10x1.5 → Ø8.376) |
 | `add_hole_on_face(diameter_mm, face, x_mm, y_mm, z_mm, depth_mm, name)` | Round hole on ANY planar face at a 3D point, through or blind (side holes, heat-set insert holes); the face through the point is used |
-| `add_hole_wizard(kind, size, face, x_mm, y_mm, z_mm, depth_mm, fit, thread, name)` | ISO hole from SolidWorks' Hole Wizard tables: clearance (ISO 273 fits), counterbore, countersink or tapped; `thread="modeled"` cuts a real, printable thread |
+| `add_hole_wizard(kind, size, face, x_mm, y_mm, z_mm, depth_mm, fit, thread, name, standard)` | GB (default) or ISO hole from SolidWorks' Hole Wizard tables: clearance (GB/T 5277, ISO 273 fallback), counterbore (GB/T 70.1), countersink (GB/T 70.3) or tapped; `thread="modeled"` cuts a real, printable thread |
 | `add_boss_on_face(diameter_mm, face, x_mm, y_mm, z_mm, height_mm, name)` | Round boss (standoff, peg) grown out of ANY planar face |
 | `add_extruded_profile_on_face(points_mm, face, depth_mm, name, corner_radii_mm)` | Polygon pad/ledge grown out of ANY planar face (3D points on the face) |
 | `add_text_on_face(text, face, x_mm, y_mm, z_mm, height_mm, depth_mm, emboss, font, name)` | Engrave text into ANY planar face, or emboss it: labels, version numbers; the position is two dimensions |
@@ -286,7 +289,7 @@ The server speaks MCP over **stdio**.
 | `check_printability(up, overhang_deg, min_wall_mm)` | For a print direction: overhanging faces (area, worst lean, centre), islands and edge stretches that start in the air, bed contact, height; with `min_wall_mm` the walls thinner than that |
 | `export(path, file_format, quality, deviation_mm, angle_deg, per_component)` | STEP/STL/IGES/Parasolid/3MF (silent; verifies file). STL/3MF tessellation: `quality` `coarse`/`fine`, or explicit `deviation_mm`+`angle_deg`; an assembly's STL as one file or one per component |
 | `screenshot(path, view, zoom_mm, show_planes, from_dir)` | PNG/JPG/TIF from a standard view (`iso`, `front`, `top`, …) or any direction, zoomed to fit or onto a region; planes and axes left out unless asked for |
-| `make_drawing(path)` | 2D drawing as PDF or editable `.slddrw`: front, top, right (first angle) and isometric views on A4 with the model's own dimensions, each once |
+| `make_drawing(path, template)` | 2D drawing as PDF or editable `.slddrw`: front, top, right (GB/T 14692 first angle) and isometric views on A4 (GB/T 14689) with the model's own dimensions, each once; optional GB drawing template for a GB title block |
 | `save_part(path)` / `open_part(path)` | Save to / open a native `.sldprt`; `open_part` also imports STEP, IGES and Parasolid files as a part to build on |
 | `close_part(save)` | Close the current part or assembly; without one, SolidWorks' active document if it is saved |
 | `list_documents` / `activate_document(title)` | The open documents (path, type, unsaved changes) / make one current again, also one never saved |

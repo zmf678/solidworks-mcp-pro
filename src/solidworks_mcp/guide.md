@@ -7,6 +7,10 @@ short connect-time instructions first; this is the long version.
 
 - All lengths are **millimetres**, angles **degrees**. The server converts to
   SolidWorks' metres and radians.
+- The project's default modelling and drawing standard is **GB** (Chinese
+  national standards): GB/T 26099 for 3D modelling, GB/T 14692 for first-angle
+  projection and GB/T 14689 for A4 sheets. ISO remains available as a fallback
+  for Hole Wizard calls (`standard="ISO"`); GB is the default.
 - New geometry starts on the **Front plane** (XY) and extrudes along **+Z** from
   z = 0: `add_box`, `add_extruded_profile`, `add_extruded_spline`, `add_disc`,
   `cut_profile` and the lofts all use this frame.
@@ -120,15 +124,17 @@ stray drag in SolidWorks can change the part.
 - **Holes**: `add_hole` (through, along Z), `add_counterbore_hole` (on +Z),
   `add_hole_on_face` (any planar face, through or blind with `depth_mm`: a
   heat-set insert hole, a screw pilot).
-- **Standard holes**: `add_hole_wizard` sizes a hole from SolidWorks' own ISO
-  tables: `clearance` (ISO 273; M3 is 3.2 / 3.4 / 3.6 for a close / normal /
-  loose fit), `counterbore` (socket head cap screw), `countersink` (socket
-  countersunk screw) and `tapped` (ISO tap drill plus a cosmetic thread). The
-  sizes it used come back in `hole`, ready for your hand calculation. A blind
-  hole ends in a 118 degree drill point; its depth counts from the surface.
-  The Hole Wizard only makes *cosmetic* threads; `thread="modeled"` drills the
-  ISO basic minor diameter and cuts a real, printable thread with the Thread
-  feature, over the standard depth (2 x D) or all the way through.
+- **Standard holes**: `add_hole_wizard` defaults to the **GB** tables
+  (`standard="GB"`): `clearance` (GB/T 5277; M3 is 3.2 / 3.4 / 3.6 for a close /
+  normal / loose fit), `counterbore` (GB/T 70.1 socket head cap screw),
+  `countersink` (GB/T 70.3 countersunk socket head screw) and `tapped` (GB tap
+  drill plus a cosmetic thread). `standard="ISO"` keeps the ISO 273 / 4762 /
+  10642 tables as a fallback. The sizes it used come back in `hole` with the
+  standard name, ready for your hand calculation. A blind hole ends in a 118
+  degree drill point; its depth counts from the surface. The Hole Wizard only
+  makes *cosmetic* threads; `thread="modeled"` drills the GB/T 196 basic minor
+  diameter and cuts a real, printable thread with the Thread feature, over the
+  standard depth (2 x D) or all the way through.
 - **Adding material to a part**: `add_boss_on_face` (a round boss: standoff,
   peg) and `add_extruded_profile_on_face` (a polygon pad or ledge) grow out of
   any planar face. A PCB standoff is a boss plus a blind hole in its top.
@@ -225,10 +231,11 @@ stray drag in SolidWorks can change the part.
 - **Ribs / gussets**: `add_rib` draws a straight rib in a plane parallel to the
   Front plane at `z_mm`; give `toward_mm` as a point on the side to fill (for an
   L-bracket: its inner corner).
-- **Threads** (real, printable): `add_thread` with an ISO size as SolidWorks
-  names it (`M10x1.5`, `M3x0.5`, `M10x1.0`). External: the rod must have the
-  nominal diameter. Internal: drill the ISO basic minor diameter first,
-  D - 1.0825 P (M10x1.5 -> 8.376 mm); the error tells you the value.
+- **Threads** (real, printable): `add_thread` with a GB/T 196/197 metric size as
+  SolidWorks names it (`M10x1.5`, `M3x0.5`, `M10x1.0`; the metric designation
+  is the same as ISO). External: the rod must have the nominal diameter.
+  Internal: drill the GB/T 196 basic minor diameter first, D - 1.0825 P
+  (M10x1.5 -> 8.376 mm); the error tells you the value.
 - **Patterns**: `add_linear_pattern`, `add_circular_pattern` (the axis is the
   cylindrical face nearest the centre you give).
 - **Mirror**: `add_mirror(plane, offset_mm, features)` mirrors features about
@@ -258,10 +265,13 @@ stray drag in SolidWorks can change the part.
   bodies the tools act on the first. A file holding an assembly opens with
   `open_assembly` instead: its parts come in as components at their places,
   ready for `list_components` and `add_mate`.
-- **Drawings**: `make_drawing("part.pdf")` puts front, top and right views
-  (first angle) and an isometric view on A4 with the model's own dimensions,
-  each shown once, so a fully dimensioned part gives a complete sketch to
-  print or send; `.slddrw` keeps it editable. Save the part first.
+- **Drawings**: `make_drawing("part.pdf")` puts front, top and right views in
+  GB/T 14692 first-angle projection and an isometric view on an A4 sheet
+  (GB/T 14689) with the model's own dimensions, each shown once, so a fully
+  dimensioned part gives a complete sketch to print or send; `.slddrw` keeps it
+  editable. Pass `template=` SolidWorks' GB drawing template (for example
+  `gb.drwdot`) for a GB title block; otherwise the user's default drawing
+  template is used. Save the part first.
 - **Open documents**: `list_documents` lists what SolidWorks has open;
   `activate_document(title)` makes one current again, also a new part that was
   never saved (after `open_part` and `close_part` on another).
