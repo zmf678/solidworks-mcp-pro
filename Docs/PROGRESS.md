@@ -1,5 +1,9 @@
 # SolidWorks MCP — Progress log
 
+> Historical note: this log describes the upstream single-file era. The code has
+> since been split into `session/` domain mixins and `tools/` MCP wrappers; paths
+> mentioning `session.py` or `server.py` refer to the old layout.
+
 ## Environment (verified 2026-06-25)
 
 - SolidWorks: **2026 (3DEXPERIENCE R2026x)**, file version 34.2.0.0127, COM ProgID

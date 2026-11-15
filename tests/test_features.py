@@ -63,7 +63,10 @@ def test_a_hole_measured_from_the_edges_follows_its_block(part):
     box = part.add_box(40, 20, 10)
     hole = part.add_hole_on_face(4, "+z", 30, 5, 10, from_edges=True)
     assert hole["fully_defined"] is True
-    sizes = {d["name"]: d["value"] for d in part.list_dimensions(contains=hole["dimensions"]["x"].split("@")[1])["dimensions"]}
+    sizes = {
+        d["name"]: d["value"]
+        for d in part.list_dimensions(contains=hole["dimensions"]["x"].split("@")[1])["dimensions"]
+    }
     assert sizes[hole["dimensions"]["x"]] == pytest.approx(10) and sizes[hole["dimensions"]["y"]] == pytest.approx(5)
     assert hole["measured_from"]["x"]["edge_mm"][0][0] == pytest.approx(40)
     part.set_dimension(box["dimensions"]["width"], 60)
@@ -159,7 +162,7 @@ def test_cone_frustum(part):
 
 
 def test_disc(part):
-    assert abs(vol(part.add_disc(40, 10)) - math.pi * 20 ** 2 * 10) < 0.1
+    assert abs(vol(part.add_disc(40, 10)) - math.pi * 20**2 * 10) < 0.1
 
 
 def test_a_rounded_tab_between_two_points(part):
@@ -168,18 +171,20 @@ def test_a_rounded_tab_between_two_points(part):
     length = math.hypot(30, 15)
     tab = part.add_extruded_slot([10, 10], [40, 25], 8, 5)
 
-    assert abs(vol(tab) - (8 * length + math.pi * 4 ** 2) * 5) < 0.01
+    assert abs(vol(tab) - (8 * length + math.pi * 4**2) * 5) < 0.01
     box = tab["mass_properties"]["bounding_box_mm"]
-    assert box["min_mm"][:2] == pytest.approx([6, 6], abs=1e-6) and box["max_mm"][:2] == pytest.approx([44, 29], abs=1e-6)
+    assert box["min_mm"][:2] == pytest.approx([6, 6], abs=1e-6) and box["max_mm"][:2] == pytest.approx(
+        [44, 29], abs=1e-6
+    )
     longer = part.set_dimension(tab["dimensions"]["end2_x"], 50)
-    assert abs(vol(longer) - (8 * math.hypot(40, 15) + math.pi * 4 ** 2) * 5) < 0.01, "the end did not move"
+    assert abs(vol(longer) - (8 * math.hypot(40, 15) + math.pi * 4**2) * 5) < 0.01, "the end did not move"
 
 
 def test_a_disc_off_the_origin_keeps_its_centre_as_dimensions(part):
     # a round foot core at x = 69, y = 10: before, only a disc at the origin existed
     disc = part.add_disc(20, 5, x_mm=69, y_mm=10)
 
-    assert abs(vol(disc) - math.pi * 10 ** 2 * 5) < 0.1
+    assert abs(vol(disc) - math.pi * 10**2 * 5) < 0.1
     assert disc["mass_properties"]["bounding_box_mm"]["min_mm"][:2] == pytest.approx([59, 0], abs=1e-6)
     moved = part.set_dimension(disc["dimensions"]["x"], 80)
     assert moved["mass_properties"]["bounding_box_mm"]["min_mm"][0] == pytest.approx(70, abs=1e-6), (
@@ -196,7 +201,7 @@ def test_revolve_cylinder(part):
 def test_revolve_ring(part):
     # profile offset from the axis -> annular ring: outer 10, inner 5, height 2
     got = vol(part.add_revolved_profile([[5, 0], [10, 0], [10, 2], [5, 2]]))
-    assert abs(got - math.pi * (10 ** 2 - 5 ** 2) * 2) < 0.1
+    assert abs(got - math.pi * (10**2 - 5**2) * 2) < 0.1
 
 
 def test_revolve_partial(part):
@@ -281,9 +286,9 @@ def test_swept_profile_draws_u_along_minus_z_and_v_along_y(part):
     profile = [[-5, -2], [15, -2], [15, 8], [-5, 8]]  # u -5..15, v -2..8
     bbox = part.add_swept_profile(profile, [[0, 0], [40, 0]])["mass_properties"]["bounding_box_mm"]
     # u -> z = -u (-15..5), v -> y = v (-2..8)
-    assert bbox["min_mm"] == pytest.approx([0, -2, -15], abs=1e-6) and \
-        bbox["max_mm"] == pytest.approx([40, 8, 5], abs=1e-6), \
-        f"the cross-section does not lie as documented (u along -z, v along +y): {bbox}"
+    assert bbox["min_mm"] == pytest.approx([0, -2, -15], abs=1e-6) and bbox["max_mm"] == pytest.approx(
+        [40, 8, 5], abs=1e-6
+    ), f"the cross-section does not lie as documented (u along -z, v along +y): {bbox}"
 
 
 def test_loft_two_squares(part):
@@ -350,10 +355,13 @@ def test_rib_hides_its_helper_plane(part):
     )
 
 
-@pytest.mark.parametrize("points", [
-    [[20.0, 0.0], [0.0, 0.0], [0.0, 10.0], [20.007, 10.0]],   # closing segment nearly vertical
-    [[0.0, 0.0], [20.0, 0.0], [20.007, 10.0], [0.0, 10.0]],   # a middle segment nearly vertical
-])
+@pytest.mark.parametrize(
+    "points",
+    [
+        [[20.0, 0.0], [0.0, 0.0], [0.0, 10.0], [20.007, 10.0]],  # closing segment nearly vertical
+        [[0.0, 0.0], [20.0, 0.0], [20.007, 10.0], [0.0, 10.0]],  # a middle segment nearly vertical
+    ],
+)
 def test_profile_is_drawn_exactly_not_snapped(part, points):
     """SolidWorks' automatic relations snap a nearly vertical line to vertical:
     a closing segment then fails outright ('Could not create line segment'),
@@ -460,7 +468,7 @@ def test_round_flange(part):
     part.add_hole(20, 0, 0, name="Bore")
     part.add_hole(10, 30, 0, name="Bolt")
     r = part.add_circular_pattern(6, 0, 0)
-    expected = math.pi * 15 * (40 ** 2 - 10 ** 2 - 6 * 5 ** 2)
+    expected = math.pi * 15 * (40**2 - 10**2 - 6 * 5**2)
     assert abs(vol(r) - expected) < 0.5
 
 
@@ -479,8 +487,7 @@ def test_extruded_profile_explicitly_closed(part):
 def test_extruded_spline_circle_approx(part):
     # a closed spline through 24 points on a circle r=20 approximates the circle;
     # extruded 10 mm -> volume ~= pi*r^2*h (spline area is not analytic, so loose tol)
-    pts = [[20 * math.cos(2 * math.pi * i / 24), 20 * math.sin(2 * math.pi * i / 24)]
-           for i in range(24)]
+    pts = [[20 * math.cos(2 * math.pi * i / 24), 20 * math.sin(2 * math.pi * i / 24)] for i in range(24)]
     assert abs(vol(part.add_extruded_spline(pts, 10)) - math.pi * 400 * 10) < 30
 
 
@@ -505,7 +512,7 @@ def test_counterbore_hole(part):
     # clearance Ø5 through 10 mm + Ø10 counterbore 4 mm deep, centred at (20,10).
     # removed = pi*2.5^2*10 + pi*(5^2 - 2.5^2)*4 = 196.35 + 235.62 = 431.97
     part.add_box(40, 20, 10)
-    removed = math.pi * 2.5 ** 2 * 10 + math.pi * (5 ** 2 - 2.5 ** 2) * 4
+    removed = math.pi * 2.5**2 * 10 + math.pi * (5**2 - 2.5**2) * 4
     assert abs(vol(part.add_counterbore_hole(5, 10, 4, 20, 10)) - (8000 - removed)) < 0.5
 
 
@@ -571,27 +578,27 @@ def test_cut_slot_blind(part):
     # L=20 (centre-to-centre), W=10 obround at (20,10), 5 mm deep.
     # area = L*W + pi*(W/2)^2 = 200 + 25*pi
     part.add_box(40, 20, 10)
-    area = 20 * 10 + math.pi * 5 ** 2
+    area = 20 * 10 + math.pi * 5**2
     assert abs(vol(part.cut_slot(20, 10, 20, 10, 0, 5)) - (8000 - area * 5)) < 0.5
 
 
 def test_cut_slot_through(part):
     part.add_box(40, 20, 10)
-    area = 20 * 10 + math.pi * 5 ** 2
+    area = 20 * 10 + math.pi * 5**2
     assert abs(vol(part.cut_slot(20, 10, 20, 10, 0, None)) - (8000 - area * 10)) < 1.0
 
 
 def test_cut_slot_angled_same_volume(part):
     # A 90-degree slot fits the 20-wide plate and removes the same volume.
     part.add_box(40, 20, 10)
-    area = 10 * 8 + math.pi * 4 ** 2
+    area = 10 * 8 + math.pi * 4**2
     assert abs(vol(part.cut_slot(10, 8, 20, 10, 90, 5)) - (8000 - area * 5)) < 0.5
 
 
 def test_cut_slot_angled_through(part):
     # 45-degree slot cut THROUGH the plate; slot area is rotation-invariant
     part.add_box(40, 20, 10)
-    area = 8 * 6 + math.pi * 3 ** 2
+    area = 8 * 6 + math.pi * 3**2
     assert abs(vol(part.cut_slot(8, 6, 20, 10, 45, None)) - (8000 - area * 10)) < 1.0
 
 
@@ -630,7 +637,7 @@ def test_fillet_the_outline_of_a_face_but_not_its_holes(part):
     holed = part.add_fillet(1, edges="+z:outline")
 
     assert holed["edges_filleted"] == 4, "the hole's rim was taken for the outline too"
-    assert abs(vol(holed) - (vol(plain) - math.pi * 3 ** 2 * 10)) < 0.01, "the hole's rim got rounded"
+    assert abs(vol(holed) - (vol(plain) - math.pi * 3**2 * 10)) < 0.01, "the hole's rim got rounded"
 
 
 def test_a_hole_face_gives_its_axis_radius_and_centre(part):
@@ -669,7 +676,8 @@ def test_a_chamfer_at_60_degrees_leaves_the_named_face(part, face):
     chamfered = part.add_chamfer(2, edges=f"{face}:outline", angle_deg=60, from_face=face)
     removed = before - vol(chamfered)
     assert removed == pytest.approx(math.pi * (20 - a / 3) * a * b, rel=1e-3), (
-        f"the 2 mm did not run along the {face} face: {removed:.1f} mm3 removed")
+        f"the 2 mm did not run along the {face} face: {removed:.1f} mm3 removed"
+    )
 
 
 def test_a_part_keeps_its_colour_after_saving(part, tmp_path):
@@ -752,13 +760,15 @@ def test_a_material_of_its_own_by_its_density(part, tmp_path):
     part.set_material("TPU", density_kg_m3=1100)
     tpu = part.set_material("TPU", density_kg_m3=1210)
     assert tpu["material"] == "TPU" and tpu["mass_properties"]["mass_kg"] == pytest.approx(1.21e-3)
-    assert part._sw.GetUserPreferenceStringValue(SW_FILE_LOCATIONS_MATERIALS) == folders, \
+    assert part._sw.GetUserPreferenceStringValue(SW_FILE_LOCATIONS_MATERIALS) == folders, (
         "set_material left SolidWorks' material folders changed"
+    )
     saved = part.save_part(str(tmp_path / "tpu_block.sldprt"))["path"]
     part.close_part()
     part.open_part(saved)
-    assert part.get_mass_properties()["mass_properties"]["density_kg_m3"] == pytest.approx(1210), \
+    assert part.get_mass_properties()["mass_properties"]["density_kg_m3"] == pytest.approx(1210), (
         "the part lost its TPU density once the material file was gone"
+    )
 
 
 def test_inspect_counts(part):
@@ -842,6 +852,7 @@ def test_an_stl_keeps_the_parts_coordinates(part, tmp_path):
     its STL was off by the shift. A Ø40 disc centred on the origin, 10 thick."""
     from solidworks_mcp.constants import SW_TOGGLE_STL_DONT_TRANSLATE
     from solidworks_mcp.mesh_tools import load_mesh
+
     setting = part._sw.GetUserPreferenceToggle(SW_TOGGLE_STL_DONT_TRANSLATE)
     part.add_disc(40, 10)
     exported = part.export(str(tmp_path / "disc.stl"))
@@ -854,6 +865,7 @@ def test_an_stl_keeps_the_parts_coordinates(part, tmp_path):
 def test_export_restores_stl_prefs(part, tmp_path):
     # the global STL quality pref must be unchanged after an export (save/restore)
     from solidworks_mcp.constants import SW_STL_QUALITY
+
     before = part._sw.GetUserPreferenceIntegerValue(SW_STL_QUALITY)
     part.add_disc(40, 10)
     part.export(str(tmp_path / "x.stl"), quality="coarse")
@@ -861,8 +873,15 @@ def test_export_restores_stl_prefs(part, tmp_path):
 
 
 # The model axis that points at the viewer in each standard view.
-VIEW_FACING_AXES = {"front": [0, 0, 1], "back": [0, 0, -1], "right": [1, 0, 0], "left": [-1, 0, 0],
-                    "top": [0, 1, 0], "bottom": [0, -1, 0], "iso": [3 ** -0.5] * 3}
+VIEW_FACING_AXES = {
+    "front": [0, 0, 1],
+    "back": [0, 0, -1],
+    "right": [1, 0, 0],
+    "left": [-1, 0, 0],
+    "top": [0, 1, 0],
+    "bottom": [0, -1, 0],
+    "iso": [3**-0.5] * 3,
+}
 
 
 def shown_view(session):
@@ -896,7 +915,7 @@ def test_screenshot_looks_from_any_direction(part, tmp_path):
     below = [-1, 1, -1]
     assert part.screenshot(str(tmp_path / "below.png"), from_dir=below)["bytes"] > 0
     data = binding.wrap(shown_view(part).Orientation3, binding.module().IMathTransform).ArrayData
-    unit = [c / 3 ** 0.5 for c in below]
+    unit = [c / 3**0.5 for c in below]
     facing = [sum(data[col * 3 + row] * unit[col] for col in range(3)) for row in range(3)]
     assert facing == pytest.approx([0, 0, 1], abs=1e-3), "the screenshot does not look from -x, +y, -z"
 
@@ -914,6 +933,7 @@ def on_screen(session, point_mm):
     """Where a model point lands in the view, in SolidWorks' screen coordinates."""
     import pythoncom
     import win32com.client
+
     mod = binding.module()
     xform = binding.wrap(shown_view(session).Transform, mod.IMathTransform)
     mathutil = binding.wrap(session._sw.GetMathUtility(), mod.IMathUtility)
@@ -966,6 +986,7 @@ def test_screenshot_leaves_the_planes_out(part, tmp_path, monkeypatch):
 # prove the dimensions are the right ones: changing one gives the volume a hand
 # calculation predicts for exactly that change.
 
+
 def test_box_width_and_height_are_dimensions(part):
     dims = part.add_box(40, 20, 10)["dimensions"]
     assert abs(vol(part.set_dimension(dims["width"], 50)) - 50 * 20 * 10) < 0.01, "'width' does not drive the width"
@@ -994,7 +1015,9 @@ def test_profile_gets_one_dimension_per_distinct_edge_position(part):
 
 def test_cylinder_radius_is_a_dimension(part):
     dims = part.add_cylinder(20, 20)["dimensions"]
-    assert abs(vol(part.set_dimension(dims["radius"], 15)) - math.pi * 225 * 20) < 0.1, "'radius' does not drive the radius"
+    assert abs(vol(part.set_dimension(dims["radius"], 15)) - math.pi * 225 * 20) < 0.1, (
+        "'radius' does not drive the radius"
+    )
 
 
 def test_cone_top_radius_is_a_dimension(part):
@@ -1006,27 +1029,35 @@ def test_cone_top_radius_is_a_dimension(part):
 
 def test_revolved_ring_outer_radius_is_a_dimension(part):
     dims = part.add_revolved_profile([[5, 0], [10, 0], [10, 2], [5, 2]])["dimensions"]
-    assert abs(vol(part.set_dimension(dims["x1"], 12)) - math.pi * (12 ** 2 - 5 ** 2) * 2) < 0.1, "'x1' does not drive the outer radius"
+    assert abs(vol(part.set_dimension(dims["x1"], 12)) - math.pi * (12**2 - 5**2) * 2) < 0.1, (
+        "'x1' does not drive the outer radius"
+    )
 
 
 def test_slot_width_is_a_dimension(part):
     part.add_box(40, 20, 10)
     dims = part.cut_slot(20, 10, 20, 10, 0, 5)["dimensions"]
-    area = 20 * 8 + math.pi * 4 ** 2
-    assert abs(vol(part.set_dimension(dims["width"], 8)) - (8000 - area * 5)) < 0.5, "'width' does not drive the slot width"
+    area = 20 * 8 + math.pi * 4**2
+    assert abs(vol(part.set_dimension(dims["width"], 8)) - (8000 - area * 5)) < 0.5, (
+        "'width' does not drive the slot width"
+    )
 
 
 def test_counterbore_diameter_is_a_dimension(part):
     part.add_box(40, 20, 10)
     dims = part.add_counterbore_hole(5, 10, 4, 20, 10)["dimensions"]
-    removed = math.pi * 2.5 ** 2 * 10 + math.pi * (6 ** 2 - 2.5 ** 2) * 4
-    assert abs(vol(part.set_dimension(dims["cbore_diameter"], 12)) - (8000 - removed)) < 0.5, "'cbore_diameter' does not drive the pocket"
+    removed = math.pi * 2.5**2 * 10 + math.pi * (6**2 - 2.5**2) * 4
+    assert abs(vol(part.set_dimension(dims["cbore_diameter"], 12)) - (8000 - removed)) < 0.5, (
+        "'cbore_diameter' does not drive the pocket"
+    )
 
 
 def test_hole_on_face_diameter_is_a_dimension(part):
     part.add_box(40, 20, 10)
     dims = part.add_hole_on_face(8, "+x", 40, 10, 5)["dimensions"]
-    assert abs(vol(part.set_dimension(dims["diameter"], 6)) - (8000 - math.pi * 9 * 40)) < 0.1, "'diameter' does not drive the hole size"
+    assert abs(vol(part.set_dimension(dims["diameter"], 6)) - (8000 - math.pi * 9 * 40)) < 0.1, (
+        "'diameter' does not drive the hole size"
+    )
 
 
 def test_loft_profile_height_is_a_dimension(part):
@@ -1034,7 +1065,9 @@ def test_loft_profile_height_is_a_dimension(part):
     sq_a = [[-20, -20], [20, -20], [20, 20], [-20, 20]]
     sq_b = [[-10, -10], [10, -10], [10, 10], [-10, 10]]
     dims = part.add_lofted_solid([sq_a, sq_b], [0, 30])["dimensions"]
-    assert abs(vol(part.set_dimension(dims["profile1_height"], 60)) - 56000) < 2.0, "'profile1_height' does not move the top profile"
+    assert abs(vol(part.set_dimension(dims["profile1_height"], 60)) - 56000) < 2.0, (
+        "'profile1_height' does not move the top profile"
+    )
 
 
 def test_global_variable_drives_a_sketch_dimension(part):
@@ -1060,6 +1093,7 @@ def test_profile_with_many_points_is_fixed_not_dimensioned(part):
 # --- faces found by their point; blind holes and bosses on any face ------------
 # '+z' used to mean the OUTERMOST +z face only (':inner' the innermost), so a
 # pocket floor or a step in between could not be sketched on.
+
 
 def test_hole_on_a_pocket_floor_is_found_by_its_point(part):
     # 20x10 pocket 4 deep: its floor is the +z face at z=6, not the top at z=10
@@ -1098,14 +1132,18 @@ def test_profile_boss_on_the_top_face(part):
     part.add_box(40, 20, 10)
     boss = part.add_extruded_profile_on_face([[10, 5, 10], [30, 5, 10], [30, 15, 10], [10, 15, 10]], "+z", 5)
     assert abs(vol(boss) - (8000 + 200 * 5)) < 0.1
-    assert abs(boss["mass_properties"]["bounding_box_mm"]["max_mm"][2] - 15) < 1e-6, "the boss must grow out of the face"
+    assert abs(boss["mass_properties"]["bounding_box_mm"]["max_mm"][2] - 15) < 1e-6, (
+        "the boss must grow out of the face"
+    )
 
 
 def test_round_boss_on_a_side_face(part):
     part.add_box(40, 20, 10)
     boss = part.add_boss_on_face(8, "+x", 40, 10, 5, 6)
     assert abs(vol(boss) - (8000 + math.pi * 16 * 6)) < 0.1
-    assert abs(boss["mass_properties"]["bounding_box_mm"]["max_mm"][0] - 46) < 1e-6, "the boss must grow out of the face"
+    assert abs(boss["mass_properties"]["bounding_box_mm"]["max_mm"][0] - 46) < 1e-6, (
+        "the boss must grow out of the face"
+    )
     assert set(boss["dimensions"]) == {"diameter", "x", "y", "height"}
 
 
@@ -1121,8 +1159,12 @@ def test_list_dimensions_names_every_dimension_with_its_value(part):
     part.add_box(40, 20, 10)
     hole = part.add_hole(8, 20, 10)
     listed = {d["name"]: d for d in part.list_dimensions()["dimensions"]}
-    for name, value in ((hole["dimensions"]["diameter"], 8), (hole["dimensions"]["x"], 20),
-                        (hole["dimensions"]["y"], 10), ("D1@BlockExtrude", 10)):
+    for name, value in (
+        (hole["dimensions"]["diameter"], 8),
+        (hole["dimensions"]["x"], 20),
+        (hole["dimensions"]["y"], 10),
+        ("D1@BlockExtrude", 10),
+    ):
         assert name in listed, f"{name} is missing from list_dimensions"
         assert abs(listed[name]["value"] - value) < 1e-6 and listed[name]["unit"] == "mm"
     assert all(d["driving"] for d in listed.values())
@@ -1132,6 +1174,7 @@ def test_list_dimensions_names_every_dimension_with_its_value(part):
 # A 40 x 20 x 10 block, holes from its top face at (20, 10). Clearances follow
 # ISO 273, tap drills ISO 2306; counterbore/countersink sizes are SolidWorks'
 # ISO tables for socket head (ISO 4762) and countersunk (ISO 10642) screws.
+
 
 def _drill_point(d):
     """Volume of a 118 degree drill point of diameter d."""
@@ -1150,7 +1193,7 @@ def test_wizard_clearance_hole_follows_iso_273(part, fit, d):
 def test_wizard_blind_clearance_hole_ends_in_a_drill_point(part):
     part.add_box(40, 20, 10)
     got = vol(part.add_hole_wizard("clearance", "M3", "+z", 20, 10, 10, depth_mm=6))
-    assert abs(8000 - got - (math.pi * 1.7 ** 2 * 6 + _drill_point(3.4))) < 0.01
+    assert abs(8000 - got - (math.pi * 1.7**2 * 6 + _drill_point(3.4))) < 0.01
 
 
 def test_wizard_counterbore_for_a_socket_head_screw(part):
@@ -1158,7 +1201,7 @@ def test_wizard_counterbore_for_a_socket_head_screw(part):
     hole = part.add_hole_wizard("counterbore", "M3", "+z", 20, 10, 10)
     info = hole["hole"]
     assert (info["diameter_mm"], info["cbore_diameter_mm"], info["cbore_depth_mm"]) == pytest.approx((3.4, 6.5, 3.4))
-    removed = math.pi * 1.7 ** 2 * 10 + math.pi * (3.25 ** 2 - 1.7 ** 2) * 3.4
+    removed = math.pi * 1.7**2 * 10 + math.pi * (3.25**2 - 1.7**2) * 3.4
     assert abs(8000 - vol(hole) - removed) < 0.01
 
 
@@ -1166,7 +1209,7 @@ def test_wizard_blind_counterbore(part):
     # blind depth counts from the surface, the counterbore included
     part.add_box(40, 20, 10)
     got = vol(part.add_hole_wizard("counterbore", "M3", "+z", 20, 10, 10, depth_mm=6))
-    removed = math.pi * 3.25 ** 2 * 3.4 + math.pi * 1.7 ** 2 * (6 - 3.4) + _drill_point(3.4)
+    removed = math.pi * 3.25**2 * 3.4 + math.pi * 1.7**2 * (6 - 3.4) + _drill_point(3.4)
     assert abs(8000 - got - removed) < 0.01
 
 
@@ -1176,8 +1219,8 @@ def test_wizard_countersink_for_a_countersunk_screw(part):
     info = hole["hole"]
     assert (info["csink_diameter_mm"], info["csink_angle_deg"]) == pytest.approx((6.72, 90.0))
     h = (6.72 - 3.4) / 2  # a 90 degree countersink is as deep as it is wide per side
-    cone = math.pi * h / 3 * (3.36 ** 2 + 3.36 * 1.7 + 1.7 ** 2) - math.pi * 1.7 ** 2 * h
-    assert abs(8000 - vol(hole) - (math.pi * 1.7 ** 2 * 10 + cone)) < 0.01
+    cone = math.pi * h / 3 * (3.36**2 + 3.36 * 1.7 + 1.7**2) - math.pi * 1.7**2 * h
+    assert abs(8000 - vol(hole) - (math.pi * 1.7**2 * 10 + cone)) < 0.01
 
 
 def test_wizard_tapped_hole_uses_the_iso_tap_drill(part):
@@ -1186,7 +1229,7 @@ def test_wizard_tapped_hole_uses_the_iso_tap_drill(part):
     info = hole["hole"]
     assert (info["tap_drill_diameter_mm"], info["thread_depth_mm"]) == pytest.approx((2.5, 6.0))
     assert info["cosmetic_thread"] is True
-    assert abs(8000 - vol(hole) - (math.pi * 1.25 ** 2 * 8 + _drill_point(2.5))) < 0.01
+    assert abs(8000 - vol(hole) - (math.pi * 1.25**2 * 8 + _drill_point(2.5))) < 0.01
 
 
 def test_wizard_tapped_hole_with_a_modeled_thread(part):
@@ -1250,7 +1293,9 @@ def test_wizard_hole_lands_on_its_face_whatever_the_view(part):
     part._model.ShowNamedView2("", VIEWS["left"])
     hole = part.add_hole_wizard("clearance", "M3", "+y", 25, 10, 10)
     assert hole["fully_defined"] is True
-    assert part._circular_edges_at(25, 10, 10), "the hole went into the face seen first in the view, not +y at (25, 10, 10)"
+    assert part._circular_edges_at(25, 10, 10), (
+        "the hole went into the face seen first in the view, not +y at (25, 10, 10)"
+    )
 
 
 def test_wizard_hole_on_either_of_two_top_faces_at_one_height(part):
@@ -1265,13 +1310,29 @@ def test_wizard_hole_on_either_of_two_top_faces_at_one_height(part):
 
 # --- compare the part with a reference mesh --------------------------------------
 
+
 def _box_stl(path, x0, y0, z0, w, h, d):
     """A binary STL of a w x h x d box with its corner at (x0, y0, z0)."""
     import struct
-    v = [(x0 + dx * w, y0 + dy * h, z0 + dz * d) for dx, dy, dz in
-         ((0, 0, 0), (1, 0, 0), (1, 1, 0), (0, 1, 0), (0, 0, 1), (1, 0, 1), (1, 1, 1), (0, 1, 1))]
-    faces = [(0, 2, 1), (0, 3, 2), (4, 5, 6), (4, 6, 7), (0, 1, 5), (0, 5, 4),
-             (1, 2, 6), (1, 6, 5), (2, 3, 7), (2, 7, 6), (3, 0, 4), (3, 4, 7)]
+
+    v = [
+        (x0 + dx * w, y0 + dy * h, z0 + dz * d)
+        for dx, dy, dz in ((0, 0, 0), (1, 0, 0), (1, 1, 0), (0, 1, 0), (0, 0, 1), (1, 0, 1), (1, 1, 1), (0, 1, 1))
+    ]
+    faces = [
+        (0, 2, 1),
+        (0, 3, 2),
+        (4, 5, 6),
+        (4, 6, 7),
+        (0, 1, 5),
+        (0, 5, 4),
+        (1, 2, 6),
+        (1, 6, 5),
+        (2, 3, 7),
+        (2, 7, 6),
+        (3, 0, 4),
+        (3, 4, 7),
+    ]
     with open(path, "wb") as f:
         f.write(b"\0" * 80 + struct.pack("<I", len(faces)))
         for face in faces:

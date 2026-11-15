@@ -14,7 +14,7 @@ from solidworks_mcp.errors import SolidWorksError
 
 pytestmark = pytest.mark.solidworks
 
-BLOCK = 60 * 20 * 10 - (4 - math.pi) * 5 ** 2 * 10
+BLOCK = 60 * 20 * 10 - (4 - math.pi) * 5**2 * 10
 
 
 def vol(result):
@@ -57,7 +57,7 @@ def test_offset_pocket_keeps_the_holes_in_the_face(part):
     rounded_block(part)
     part.add_hole(6, 30, 10)
     pocket = part.cut_offset_pocket("+z", 10, 10, 10, rim_mm=2, depth_mm=3)
-    hole_area = math.pi * 3 ** 2
+    hole_area = math.pi * 3**2
     assert vol(pocket) == pytest.approx(BLOCK - hole_area * 10 - (inner_area(2) - hole_area) * 3, abs=1e-3)
 
 
@@ -91,7 +91,7 @@ def test_a_revolve_about_a_slanted_axis_follows_pappus(part):
     radius and height sqrt(200): pi r^2 h / 3."""
     cone = part.add_revolved_profile([[0, 0], [10, 10], [20, 0]], axis_mm=[[0, 0], [10, 10]])
     side = math.sqrt(200)
-    assert vol(cone) == pytest.approx(math.pi * side ** 2 * side / 3, rel=1e-6)
+    assert vol(cone) == pytest.approx(math.pi * side**2 * side / 3, rel=1e-6)
     assert cone["fully_defined"] is True
 
 
@@ -111,7 +111,7 @@ def test_fillet_rounds_every_edge_of_one_feature(part):
     part.add_box(40, 20, 10)
     before = vol(part.add_boss_on_face(10, "+z", 20, 10, 10, 5, name="Boss"))
     rounded = part.add_fillet(2, edges="feature:Boss")
-    spandrel, centroid = (1 - math.pi / 4) * 2 ** 2, (10 - 3 * math.pi) / (12 - 3 * math.pi) * 2
+    spandrel, centroid = (1 - math.pi / 4) * 2**2, (10 - 3 * math.pi) / (12 - 3 * math.pi) * 2
     assert rounded["edges_filleted"] == 2
     assert vol(rounded) - before == pytest.approx(spandrel * 2 * math.pi * 2 * centroid, abs=1e-3)
 
@@ -141,8 +141,10 @@ def test_points_on_a_plane_may_be_given_as_u_v(part):
     part.add_box(40, 20, 10)
     plane = part.add_plane("right", angle_deg=30, about="y", name="Cheek")
     # a 6 x 6 window around where the plane meets the box's middle, y 10, z 5
-    u, v = (sum((c - o) * a for c, o, a in zip((0, 10, 5), plane["origin_mm"], plane[axis]))
-            for axis in ("x_axis", "y_axis"))
+    u, v = (
+        sum((c - o) * a for c, o, a in zip((0, 10, 5), plane["origin_mm"], plane[axis]))
+        for axis in ("x_axis", "y_axis")
+    )
     window = ((u - 3, v - 3), (u + 3, v - 3), (u + 3, v + 3), (u - 3, v + 3))
     by_uv = vol(part.cut_profile_through_plane([list(p) for p in window], "Cheek"))
     part.delete_feature(part.list_features()["features"][-1]["name"])
@@ -185,12 +187,12 @@ def test_a_draft_tapers_the_walls(part, draft):
     """A 20 x 10 rectangle 10 deep: every wall leans in (or out) by tan(draft)
     per mm of height, so the area at height z is (20 - 2zt)(10 - 2zt)."""
     t = math.tan(math.radians(draft))
-    expected = 20 * 10 * 10 - (20 + 10) * t * 10 ** 2 + 4 / 3 * t ** 2 * 10 ** 3
+    expected = 20 * 10 * 10 - (20 + 10) * t * 10**2 + 4 / 3 * t**2 * 10**3
     tapered = part.add_extruded_profile([[0, 0], [20, 0], [20, 10], [0, 10]], 10, draft_deg=draft)
     assert vol(tapered) == pytest.approx(expected, rel=1e-9)
     straighter = part.set_dimension(tapered["dimensions"]["draft"], 2)
     t2 = math.tan(math.radians(2 if draft > 0 else -2))
-    assert vol(straighter) == pytest.approx(20 * 10 * 10 - 30 * t2 * 100 + 4 / 3 * t2 ** 2 * 1000, rel=1e-9)
+    assert vol(straighter) == pytest.approx(20 * 10 * 10 - 30 * t2 * 100 + 4 / 3 * t2**2 * 1000, rel=1e-9)
 
 
 @pytest.mark.parametrize("foot,rel", [([5, 0], 1e-4), ([-4, -9], 1e-2)], ids=["along x", "anywhere"])
@@ -199,24 +201,30 @@ def test_a_round_loft_makes_a_frustum(part, foot, rel):
     narrow end moved. Shifted circles hold the same volume (Cavalieri):
     pi h (R^2 + Rr + r^2) / 3. A steep slant comes out ~0.7% fuller in
     SolidWorks (measured), hence the wider rel there."""
-    loft = part.add_lofted_solid([{"center_mm": [0, 0], "diameter_mm": 20}, {"center_mm": foot, "diameter_mm": 10}],
-                                 [0, 30])
-    assert vol(loft) == pytest.approx(math.pi * 30 * (10 ** 2 + 10 * 5 + 5 ** 2) / 3, rel=rel),         "a loft whose circles start at different angles twists, pinches in and loses volume"
+    loft = part.add_lofted_solid(
+        [{"center_mm": [0, 0], "diameter_mm": 20}, {"center_mm": foot, "diameter_mm": 10}], [0, 30]
+    )
+    assert vol(loft) == pytest.approx(math.pi * 30 * (10**2 + 10 * 5 + 5**2) / 3, rel=rel), (
+        "a loft whose circles start at different angles twists, pinches in and loses volume"
+    )
     assert {"profile0_diameter", "profile1_diameter", "profile1_x"} <= set(loft["dimensions"])
-    assert box(loft)["max_mm"][0] == pytest.approx(10, abs=1e-4),         "the box should hug the lofted face (SolidWorks' own part box reads 10.004)"
+    assert box(loft)["max_mm"][0] == pytest.approx(10, abs=1e-4), (
+        "the box should hug the lofted face (SolidWorks' own part box reads 10.004)"
+    )
 
 
 def test_a_loft_starts_each_polygon_at_its_first_vertex(part):
     """Square 20 round the origin to square 10 off to the lower left: the corner
     nearest the origin is not the first one, so lining the profiles up by that
     corner would twist the loft half a turn. Untwisted: h (a^2 + ab + b^2) / 3."""
-    loft = part.add_lofted_solid([[[-10, -10], [10, -10], [10, 10], [-10, 10]],
-                                  [[-12, -6], [-2, -6], [-2, 4], [-12, 4]]], [0, 30])
-    assert vol(loft) == pytest.approx(30 * (20 ** 2 + 20 * 10 + 10 ** 2) / 3), "a twisted loft pinches in"
+    loft = part.add_lofted_solid(
+        [[[-10, -10], [10, -10], [10, 10], [-10, 10]], [[-12, -6], [-2, -6], [-2, 4], [-12, 4]]], [0, 30]
+    )
+    assert vol(loft) == pytest.approx(30 * (20**2 + 20 * 10 + 10**2) / 3), "a twisted loft pinches in"
 
 
 def test_a_smooth_pipe_follows_a_spline(part):
     # Pappus for tubes: area x path length, near enough for a gentle curve
     pipe = part.add_swept_pipe([[0, 0], [20, 10], [40, 0], [60, 10]], 4, smooth=True)
-    assert vol(pipe) == pytest.approx(math.pi * 2 ** 2 * pipe["path_length_mm"], rel=1e-3)
+    assert vol(pipe) == pytest.approx(math.pi * 2**2 * pipe["path_length_mm"], rel=1e-3)
     assert 60 < pipe["path_length_mm"] < 80

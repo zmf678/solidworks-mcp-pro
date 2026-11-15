@@ -106,10 +106,17 @@ def test_read_sketch_reports_a_persons_sketch_as_drawn(drawn):
 
     assert read["fully_defined"] is False and read["status"] == "under defined"
     assert read["dimensions"] == []
-    edges = sorted(tuple(sorted([tuple(s["start_mm"]), tuple(s["end_mm"])]))
-                   for s in read["segments"] if s["type"] == "line" and not s["construction"])
-    assert edges == [((30, 0, 0), (30, 20, 0)), ((30, 0, 0), (50, 0, 0)),
-                     ((30, 20, 0), (50, 20, 0)), ((50, 0, 0), (50, 20, 0))]
+    edges = sorted(
+        tuple(sorted([tuple(s["start_mm"]), tuple(s["end_mm"])]))
+        for s in read["segments"]
+        if s["type"] == "line" and not s["construction"]
+    )
+    assert edges == [
+        ((30, 0, 0), (30, 20, 0)),
+        ((30, 0, 0), (50, 0, 0)),
+        ((30, 20, 0), (50, 20, 0)),
+        ((50, 0, 0), (50, 20, 0)),
+    ]
 
 
 def test_read_sketch_names_the_sketches_there_are(part):
@@ -147,7 +154,7 @@ def test_cut_sketch_goes_into_the_part_from_a_face(drawn):
     drawn.add_box(40, 20, 10)
     name = person_circle(drawn, "+z", [20, 10, 10], 4)
     result = drawn.cut_sketch(name, 3)
-    assert vol(result) == pytest.approx(BOX - math.pi * 4 ** 2 * 3, abs=1e-3)
+    assert vol(result) == pytest.approx(BOX - math.pi * 4**2 * 3, abs=1e-3)
     assert box(result)["max_mm"] == pytest.approx([40, 20, 10]), "the cut went out of the part"
 
 

@@ -50,10 +50,20 @@ def _sketch_name(sw):
     return next(f["name"] for f in sw.list_features()["features"] if f["type"] == "ProfileFeature")
 
 
-@pytest.mark.parametrize("tool", [
-    "list_dimensions", "list_features", "list_equations", "get_mass_properties", "get_bounding_box",
-    "list_faces", "list_edges", "list_bodies", "check_printability",
-])
+@pytest.mark.parametrize(
+    "tool",
+    [
+        "list_dimensions",
+        "list_features",
+        "list_equations",
+        "get_mass_properties",
+        "get_bounding_box",
+        "list_faces",
+        "list_edges",
+        "list_bodies",
+        "check_printability",
+    ],
+)
 def test_a_part_read_leaves_the_active_document(part, tool):
     part.add_box(40, 20, 10)
     _assert_leaves_active_document(part, tool)
@@ -70,14 +80,23 @@ def _two_blocks(assembly, blocks):
     assembly.insert_component(blocks["block_b"], 100, 0, 0)
 
 
-@pytest.mark.parametrize("tool, args, kwargs", [
-    ("list_components", (), {}),
-    ("check_interference", (), {}),
-    ("measure_distance", ("block_a", "block_b"), {}),
-    ("measure_distance", ("block_a",), {"point_mm": [-10, 50, 5]}),
-    ("get_assembly_bounding_box", (), {}),
-], ids=["list_components", "check_interference", "measure_distance", "measure_distance_to_a_point",
-        "get_assembly_bounding_box"])
+@pytest.mark.parametrize(
+    "tool, args, kwargs",
+    [
+        ("list_components", (), {}),
+        ("check_interference", (), {}),
+        ("measure_distance", ("block_a", "block_b"), {}),
+        ("measure_distance", ("block_a",), {"point_mm": [-10, 50, 5]}),
+        ("get_assembly_bounding_box", (), {}),
+    ],
+    ids=[
+        "list_components",
+        "check_interference",
+        "measure_distance",
+        "measure_distance_to_a_point",
+        "get_assembly_bounding_box",
+    ],
+)
 def test_an_assembly_read_leaves_the_active_document(assembly, blocks, tool, args, kwargs):
     _two_blocks(assembly, blocks)
     _assert_leaves_active_document(assembly, tool, *args, **kwargs)
@@ -92,7 +111,9 @@ def test_measure_distance_to_an_axis_still_measures_with_another_document_active
         measured = assembly.run_guarded(assembly.measure_distance, "block_a", axis_mm=[[60, 0, 5], [0, 1, 0]])
         # the line was drawn in the active, stilled assembly (bringing the other
         # document back afterwards is the next step of #10)
-        assert _active_title(assembly) == assembly._model.GetTitle(), "the axis line was drawn in a document that is not active"
+        assert _active_title(assembly) == assembly._model.GetTitle(), (
+            "the axis line was drawn in a document that is not active"
+        )
         assert measured["distance_mm"] == pytest.approx(20, abs=1e-4)
         helpers = [f.Name for f in assembly._iter_features() if f.GetTypeName2() == "3DProfileFeature"]
         assert helpers == [], f"the helper line was left in the tree: {helpers}"

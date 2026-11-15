@@ -84,10 +84,7 @@ def connect():
     try:
         raw = win32com.client.GetActiveObject("SldWorks.Application")
     except pythoncom.com_error as exc:
-        raise SolidWorksError(
-            "No running SolidWorks found. Start SolidWorks and try again. "
-            f"(COM error: {exc})"
-        )
+        raise SolidWorksError(f"No running SolidWorks found. Start SolidWorks and try again. (COM error: {exc})")
     # Read the revision without type info: the matching wrappers aren't loaded yet.
     revision = win32com.client.dynamic.DumbDispatch(raw._oleobj_).RevisionNumber
     _mod = _load_module(revision)

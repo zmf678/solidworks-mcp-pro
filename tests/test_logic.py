@@ -6,8 +6,8 @@ direction parsing, axis classification, polygon cleaning) without SolidWorks.
 
 import math
 
-import pythoncom
 import pytest
+import pythoncom
 
 from solidworks_mcp.errors import SolidWorksError
 from solidworks_mcp.session import SolidWorksSession
@@ -46,8 +46,8 @@ def test_axis_of(s):
     assert s._axis_of(10, 0, 0, 10) == "x"
     assert s._axis_of(0, 5, 0, 5) == "y"
     assert s._axis_of(0, 0, -5, 5) == "z"
-    assert s._axis_of(1, 1, 0, 2 ** 0.5) is None   # diagonal
-    assert s._axis_of(0, 0, 0, 0) is None           # zero length
+    assert s._axis_of(1, 1, 0, 2**0.5) is None  # diagonal
+    assert s._axis_of(0, 0, 0, 0) is None  # zero length
 
 
 def test_clean_polygon_open_ring():
@@ -90,7 +90,9 @@ def test_corner_groups_reject_a_list_that_does_not_fit_the_profile():
         SolidWorksSession._corner_groups([5, 5, 5], 4)
     with pytest.raises(SolidWorksError, match=">= 0"):
         SolidWorksSession._corner_groups([5, -1, 5, 5], 4)
-    with pytest.raises(SolidWorksError, match=str(MAX_DIMENSIONED_VERTICES)):  # such profiles are fixed, not dimensioned
+    with pytest.raises(
+        SolidWorksError, match=str(MAX_DIMENSIONED_VERTICES)
+    ):  # such profiles are fixed, not dimensioned
         SolidWorksSession._corner_groups(1, MAX_DIMENSIONED_VERTICES + 6)
 
 
@@ -116,7 +118,7 @@ def test_radii_whose_arcs_would_meet_point_to_the_disc_and_slot_tools():
 
 def test_corner_radius_setback_follows_the_corner_angle():
     # a 60 degree corner sets the arc back r / tan(30 deg) = 1.732 r along each edge
-    triangle = [(0, 0), (10, 0), (5, 5 * 3 ** 0.5)]
+    triangle = [(0, 0), (10, 0), (5, 5 * 3**0.5)]
     SolidWorksSession._check_corner_radii(triangle, [(2.8, [0, 1, 2])])  # 2 * 4.85 < 10
     with pytest.raises(SolidWorksError, match="Edge 0-1"):
         SolidWorksSession._check_corner_radii(triangle, [(3, [0, 1, 2])])  # 2 * 5.196 > 10
@@ -327,8 +329,9 @@ def test_wizard_values_follow_what_solidworks_accepts():
     tapped = values("tapped", 1, True)
     assert tapped[6] == 1.0, "a tapped hole must keep its cosmetic thread (Value7)"
     assert (tapped[7], values("tapped", 1, False)[7]) == (1.0, 0.0), "thread end follows the hole's end"
-    assert all(len(values(k, 1, t)) == 12 for k in ("clearance", "counterbore", "countersink", "tapped")
-               for t in (True, False))
+    assert all(
+        len(values(k, 1, t)) == 12 for k in ("clearance", "counterbore", "countersink", "tapped") for t in (True, False)
+    )
 
 
 def test_parse_face_selector_rejects_unknown_side(s):
@@ -342,16 +345,14 @@ def test_parse_face_selector_rejects_unknown_direction(s):
 
 
 def test_rotation_columns_identity():
-    assert SolidWorksSession._rotation_columns(0, 0, 0) == pytest.approx(
-        [1, 0, 0, 0, 1, 0, 0, 0, 1], abs=1e-12)
+    assert SolidWorksSession._rotation_columns(0, 0, 0) == pytest.approx([1, 0, 0, 0, 1, 0, 0, 0, 1], abs=1e-12)
 
 
 def test_rotation_columns_are_column_major():
     # Ry(+90) maps (x,y,z) -> (z,y,-x). SolidWorks reads ArrayData COLUMN-major,
     # so the array is the TRANSPOSE of the matrix written out row by row -- this
     # is the value SolidWorks actually returned for a 90-degree turned component.
-    assert SolidWorksSession._rotation_columns(0, 90, 0) == pytest.approx(
-        [0, 0, -1, 0, 1, 0, 1, 0, 0], abs=1e-12)
+    assert SolidWorksSession._rotation_columns(0, 90, 0) == pytest.approx([0, 0, -1, 0, 1, 0, 1, 0, 0], abs=1e-12)
 
 
 def test_rotation_columns_apply_x_then_y_then_z():
@@ -367,8 +368,7 @@ def test_rotation_columns_apply_x_then_y_then_z():
     assert apply([0, 1, 0]) == pytest.approx([0, 0, 1], abs=1e-12)
 
 
-@pytest.mark.parametrize("angles", [(0, 0, 0), (90, 0, 0), (0, 0, -45),
-                                    (10, 20, 30), (-120, 35, 170)])
+@pytest.mark.parametrize("angles", [(0, 0, 0), (90, 0, 0), (0, 0, -45), (10, 20, 30), (-120, 35, 170)])
 def test_euler_round_trip(angles):
     columns = SolidWorksSession._rotation_columns(*angles)
     assert SolidWorksSession._euler_from_columns(columns) == pytest.approx(angles, abs=1e-6)
@@ -406,6 +406,7 @@ def test_screenshot_zoom_needs_two_3d_corners(s, zoom):
 
 def test_a_material_of_its_own_is_one_material_with_its_density():
     import xml.etree.ElementTree as ET
+
     root = ET.fromstring(SolidWorksSession._material_xml('TPU "95A" & more', 1210.5))
     [material] = root.iter("material")
     assert material.get("name") == 'TPU "95A" & more', "the name must survive XML intact"
@@ -448,11 +449,15 @@ def test_other_com_errors_do_not_attach_again(s, monkeypatch):
         s.run_guarded(lambda: "ran")
 
 
-@pytest.mark.parametrize("from_dir,orientation", [
-    ((1, 1, 1), (0.70711, -0.40825, 0.57735, 0, 0.8165, 0.57735, -0.70711, -0.40825, 0.57735)),  # SolidWorks' iso
-    ((0, -3, 0), (1, 0, 0, 0, 0, -1, 0, 1, 0)),  # its bottom view: +z up
-    ((0, 1, 0), (1, 0, 0, 0, 0, 1, 0, -1, 0)),  # its top view: -z up
-], ids=["iso", "bottom", "top"])
+@pytest.mark.parametrize(
+    "from_dir,orientation",
+    [
+        ((1, 1, 1), (0.70711, -0.40825, 0.57735, 0, 0.8165, 0.57735, -0.70711, -0.40825, 0.57735)),  # SolidWorks' iso
+        ((0, -3, 0), (1, 0, 0, 0, 0, -1, 0, 1, 0)),  # its bottom view: +z up
+        ((0, 1, 0), (1, 0, 0, 0, 0, 1, 0, -1, 0)),  # its top view: -z up
+    ],
+    ids=["iso", "bottom", "top"],
+)
 def test_a_view_from_a_direction_matches_solidworks_own(from_dir, orientation):
     """The columns are the screen's x, y and z; the model's +y stays up where it can."""
     assert SolidWorksSession._view_rotation(from_dir) == pytest.approx(orientation, abs=1e-5)
@@ -460,7 +465,7 @@ def test_a_view_from_a_direction_matches_solidworks_own(from_dir, orientation):
 
 def test_a_view_from_a_free_direction_looks_from_it_with_y_up():
     x, y, z = (SolidWorksSession._view_rotation((-1, 1, -1))[col::3] for col in range(3))
-    assert z == pytest.approx([-3 ** -0.5, 3 ** -0.5, -3 ** -0.5]), "the screen's z must point at the viewer"
+    assert z == pytest.approx([-(3**-0.5), 3**-0.5, -(3**-0.5)]), "the screen's z must point at the viewer"
     assert y[1] > 0 and sum(a * b for a, b in zip(x, y)) == pytest.approx(0, abs=1e-12)
 
 
@@ -469,11 +474,15 @@ def test_screenshot_needs_a_direction_to_look_from(s):
         s.screenshot("shot.png", from_dir=[0, 0, 0])
 
 
-@pytest.mark.parametrize("kwargs,match", [
-    ({"depth_mm": 5, "up_to": "next"}, "not both"),
-    ({}, "depth_mm or up_to"),
-    ({"up_to": "wall"}, "Unknown up_to 'wall'"),
-], ids=["both", "neither", "unknown"])
+@pytest.mark.parametrize(
+    "kwargs,match",
+    [
+        ({"depth_mm": 5, "up_to": "next"}, "not both"),
+        ({}, "depth_mm or up_to"),
+        ({"up_to": "wall"}, "Unknown up_to 'wall'"),
+    ],
+    ids=["both", "neither", "unknown"],
+)
 def test_extrude_sketch_ends_at_a_depth_or_the_next_face(s, kwargs, match):
     with pytest.raises(SolidWorksError, match=match):
         s.extrude_sketch("Sketch1", **kwargs)
@@ -537,8 +546,10 @@ def test_a_suppressed_component_has_no_box(s):
     assert s._component_box(_FakePart(0)) is None
 
 
-@pytest.mark.parametrize("target", [{}, {"component_b": "B-1", "point_mm": [0, 0, 0]},
-                                    {"point_mm": [0, 0, 0], "axis_mm": [[0, 0, 0], [0, 0, 1]]}])
+@pytest.mark.parametrize(
+    "target",
+    [{}, {"component_b": "B-1", "point_mm": [0, 0, 0]}, {"point_mm": [0, 0, 0], "axis_mm": [[0, 0, 0], [0, 0, 1]]}],
+)
 def test_measure_distance_needs_exactly_one_target(s, target):
     with pytest.raises(SolidWorksError, match="Give one of component_b, point_mm or axis_mm"):
         s.measure_distance("A-1", **target)
@@ -555,15 +566,16 @@ def test_measure_distance_point_needs_three_coordinates(s):
         s.measure_distance("A-1", point_mm=[0, 0])
 
 
-@pytest.mark.parametrize("call", [lambda s: s.extrude_sketch("Sketch1", 0),
-                                  lambda s: s.cut_sketch("Sketch1", -2)])
+@pytest.mark.parametrize("call", [lambda s: s.extrude_sketch("Sketch1", 0), lambda s: s.cut_sketch("Sketch1", -2)])
 def test_sketch_features_need_a_positive_depth(s, call):
     with pytest.raises(SolidWorksError, match="depth must be > 0"):
         call(s)
 
 
-@pytest.mark.parametrize("selector,index", [("#5", 5), ("5", 5), (" #12 ", 12), ("+x", None),
-                                            ("-z:inner", None), ("#x", None), ("#-1", None)])
+@pytest.mark.parametrize(
+    "selector,index",
+    [("#5", 5), ("5", 5), (" #12 ", 12), ("+x", None), ("-z:inner", None), ("#x", None), ("#-1", None)],
+)
 def test_a_face_is_picked_by_index_or_by_direction(selector, index):
     assert SolidWorksSession._face_index(selector) == index
 
@@ -574,8 +586,9 @@ def test_an_angle_mate_takes_an_angle_strictly_between_0_and_180(s, angle):
         s.add_mate("Thigh-1", "-y", "Shin-1", "-y", mate_type="angle", angle_deg=angle)
 
 
-@pytest.mark.parametrize("values,distances,message", [([], None, "values to step through"),
-                                                      ([30, 60], [["Rod-1"]], r"pairs \[\[a, b\]")])
+@pytest.mark.parametrize(
+    "values,distances,message", [([], None, "values to step through"), ([30, 60], [["Rod-1"]], r"pairs \[\[a, b\]")]
+)
 def test_check_motion_needs_values_and_pairs(s, values, distances, message):
     with pytest.raises(SolidWorksError, match=message):
         s.check_motion("D1@Angle1", values, distances)
@@ -593,8 +606,15 @@ def test_keep_inside_cuts_through_all(s):
 
 
 @pytest.mark.parametrize("tool", ["cut_profile_through_plane", "add_extruded_profile_on_plane"])
-@pytest.mark.parametrize("points", [[[0, 0], [5, 0, 0], [0, 5]], [[0, 0], [5], [0, 5]], [[0, 0], [5, "a"], [0, 5]],
-                                    [[0, 0, 0, 0], [5, 0, 0, 0], [0, 5, 0, 0]]])
+@pytest.mark.parametrize(
+    "points",
+    [
+        [[0, 0], [5, 0, 0], [0, 5]],
+        [[0, 0], [5], [0, 5]],
+        [[0, 0], [5, "a"], [0, 5]],
+        [[0, 0, 0, 0], [5, 0, 0, 0], [0, 5, 0, 0]],
+    ],
+)
 def test_plane_points_of_the_wrong_shape_are_refused_before_solidworks(s, tool, points):
     """[u, v] points given to cut_profile_through_plane, which took [x, y, z],
     took SolidWorks down with the unsaved work in it."""
@@ -637,18 +657,19 @@ def _tool_delegations():
     import ast
     import pathlib
 
-    source = pathlib.Path("src/solidworks_mcp/server.py").read_text(encoding="utf-8")
-    for node in ast.parse(source).body:
-        if not isinstance(node, ast.AsyncFunctionDef) or not node.decorator_list:
-            continue
-        call = next(n for n in ast.walk(node)
-                    if isinstance(n, ast.Call)
-                    and getattr(n.func, "id", None) in ("_call", "_call_without_solidworks"))
-        target, *passed = call.args
-        yield (node.name,
-               [a.arg for a in node.args.args],
-               target.attr,
-               [getattr(a, "id", None) for a in passed])
+    source_files = sorted(pathlib.Path("src/solidworks_mcp/tools").glob("*.py"))
+    for source_file in source_files:
+        source = source_file.read_text(encoding="utf-8")
+        for node in ast.parse(source).body:
+            if not isinstance(node, ast.AsyncFunctionDef) or not node.decorator_list:
+                continue
+            call = next(
+                n
+                for n in ast.walk(node)
+                if isinstance(n, ast.Call) and getattr(n.func, "id", None) in ("_call", "_call_without_solidworks")
+            )
+            target, *passed = call.args
+            yield (node.name, [a.arg for a in node.args.args], target.attr, [getattr(a, "id", None) for a in passed])
 
 
 @pytest.mark.parametrize("tool,params,target,passed", list(_tool_delegations()))
@@ -664,7 +685,7 @@ def test_tool_forwards_its_arguments_in_order(tool, params, target, passed):
     assert method is not None, f"{tool} delegates to a session method that does not exist"
     assert passed == params, f"{tool} forwards {passed} but takes {params}"
     accepted = list(inspect.signature(method).parameters)[1:]  # drop self
-    assert params == accepted[:len(params)], f"{tool} does not match {target}{tuple(accepted)}"
+    assert params == accepted[: len(params)], f"{tool} does not match {target}{tuple(accepted)}"
 
 
 # --- 3D printing and drawings (pure parts) --------------------------------------
@@ -706,9 +727,11 @@ def _quad(index, corners, normal):
 def test_a_ceiling_overhangs_and_the_bed_does_not(s):
     """The underside of an arm at z = 5 faces down, like the bed face at z = 0:
     only the arm needs support."""
-    triangles = (_quad(0, [(0, 0, 0), (10, 0, 0), (10, 10, 0), (0, 10, 0)], (0, 0, -1))
-                 + _quad(1, [(10, 0, 5), (14, 0, 5), (14, 10, 5), (10, 10, 5)], (0, 0, -1))
-                 + _quad(2, [(0, 0, 10), (14, 0, 10), (14, 10, 10), (0, 10, 10)], (0, 0, 1)))
+    triangles = (
+        _quad(0, [(0, 0, 0), (10, 0, 0), (10, 10, 0), (0, 10, 0)], (0, 0, -1))
+        + _quad(1, [(10, 0, 5), (14, 0, 5), (14, 10, 5), (10, 10, 5)], (0, 0, -1))
+        + _quad(2, [(0, 0, 10), (14, 0, 10), (14, 10, 10), (0, 10, 10)], (0, 0, 1))
+    )
     found = s._overhangs(triangles, (0, 0, 1), 45)
     assert found["bed_contact_mm2"] == pytest.approx(100) and found["height_mm"] == pytest.approx(10)
     [arm] = found["overhang"]["faces"]
@@ -724,10 +747,12 @@ def _hanging_wedge(material_above=True):
     steep to overhang, yet the ridge starts in the air."""
     flip = 1 if material_above else -1
     left, right = math.hypot(5, 3), math.hypot(5, 3)
-    return (_quad(0, [(0, 0, 0), (10, 0, 0), (10, 10, 0), (0, 10, 0)], (0, 0, -1))
-            + _quad(1, [(20, 0, 3), (20, 10, 3), (17, 10, 8), (17, 0, 8)], (flip * -5 / left, 0, flip * -3 / left))
-            + _quad(2, [(20, 0, 3), (23, 0, 8), (23, 10, 8), (20, 10, 3)], (flip * 5 / right, 0, flip * -3 / right))
-            + _quad(3, [(17, 0, 8), (17, 10, 8), (23, 10, 8), (23, 0, 8)], (0, 0, flip)))
+    return (
+        _quad(0, [(0, 0, 0), (10, 0, 0), (10, 10, 0), (0, 10, 0)], (0, 0, -1))
+        + _quad(1, [(20, 0, 3), (20, 10, 3), (17, 10, 8), (17, 0, 8)], (flip * -5 / left, 0, flip * -3 / left))
+        + _quad(2, [(20, 0, 3), (23, 0, 8), (23, 10, 8), (20, 10, 3)], (flip * 5 / right, 0, flip * -3 / right))
+        + _quad(3, [(17, 0, 8), (17, 10, 8), (23, 10, 8), (23, 0, 8)], (0, 0, flip))
+    )
 
 
 def test_an_edge_starting_in_the_air_is_an_island(s):
@@ -759,14 +784,20 @@ def test_a_groove_a_flat_ceiling_and_the_bed_have_no_lower_edges(s):
     """A groove holds material below; a flat ceiling is overhang already, and
     its own edges have the ceiling beside them, not above."""
     assert s._lower_edges(_hanging_wedge(material_above=False), (0, 0, 1), 45) == []
-    ceiling = (_quad(0, [(0, 0, 0), (10, 0, 0), (10, 10, 0), (0, 10, 0)], (0, 0, -1))
-               + _quad(1, [(10, 0, 5), (14, 0, 5), (14, 10, 5), (10, 10, 5)], (0, 0, -1)))
+    ceiling = _quad(0, [(0, 0, 0), (10, 0, 0), (10, 10, 0), (0, 10, 0)], (0, 0, -1)) + _quad(
+        1, [(10, 0, 5), (14, 0, 5), (14, 10, 5), (10, 10, 5)], (0, 0, -1)
+    )
     assert s._lower_edges(ceiling, (0, 0, 1), 45) == []
 
 
-@pytest.mark.parametrize("arguments,message", [({"up": "up"}, "Unknown direction"),
-                                               ({"overhang_deg": 90}, "between 0 and 90"),
-                                               ({"min_wall_mm": 0}, "min_wall_mm must be > 0")])
+@pytest.mark.parametrize(
+    "arguments,message",
+    [
+        ({"up": "up"}, "Unknown direction"),
+        ({"overhang_deg": 90}, "between 0 and 90"),
+        ({"min_wall_mm": 0}, "min_wall_mm must be > 0"),
+    ],
+)
 def test_check_printability_checks_its_input(s, arguments, message):
     with pytest.raises(SolidWorksError, match=message):
         s.check_printability(**arguments)
@@ -778,15 +809,20 @@ _ISO = (0.707, 0, -0.707, -0.408, 0.816, -0.408, 0.577, 0.577, 0.577)
 def test_the_isometric_view_is_found_by_how_it_looks_not_by_name():
     """make_drawing asked for '*Isometric', which a French SolidWorks calls
     '*Isométrique': 'SolidWorks could not place the isometric view'."""
-    turned = {"*Face": (1, 0, 0, 0, 1, 0, 0, 0, 1), "*Dessus": (1, 0, 0, 0, 0, -1, 0, 1, 0),
-              "*Isométrique": _ISO, "Ma vue": _ISO}
+    turned = {
+        "*Face": (1, 0, 0, 0, 1, 0, 0, 0, 1),
+        "*Dessus": (1, 0, 0, 0, 0, -1, 0, 1, 0),
+        "*Isométrique": _ISO,
+        "Ma vue": _ISO,
+    }
     assert SolidWorksSession._standard_view_like(list(turned), turned.get, _ISO) == "*Isométrique"
 
 
 def test_no_standard_view_like_it_is_refused():
     with pytest.raises(SolidWorksError, match="isometric"):
-        SolidWorksSession._standard_view_like(["*Front", "Mine"], {"*Front": (1, 0, 0, 0, 1, 0, 0, 0, 1),
-                                                                    "Mine": _ISO}.get, _ISO)
+        SolidWorksSession._standard_view_like(
+            ["*Front", "Mine"], {"*Front": (1, 0, 0, 0, 1, 0, 0, 0, 1), "Mine": _ISO}.get, _ISO
+        )
 
 
 def test_a_drawing_is_a_pdf_or_a_slddrw(s):
@@ -812,11 +848,14 @@ def test_the_offset_from_a_slanted_axis_tells_side_and_distance():
     assert offset((0, 0), (10, 10), (20, 20)) == pytest.approx(0)
 
 
-@pytest.mark.parametrize("profile,message", [
-    ([[10, 0], [20, 0], [20, 10], [0, 10]], "crosses the axis"),   # (0, 10) lies across y = x
-    ([[0, 0], [5, 5], [10, 10]], "entirely on the axis"),
-    ([[10, 0], [20, 0], [20, 10], [10, 10]], r"Point\(s\) \[3\] touch the axis on their own"),  # a pinch
-])
+@pytest.mark.parametrize(
+    "profile,message",
+    [
+        ([[10, 0], [20, 0], [20, 10], [0, 10]], "crosses the axis"),  # (0, 10) lies across y = x
+        ([[0, 0], [5, 5], [10, 10]], "entirely on the axis"),
+        ([[10, 0], [20, 0], [20, 10], [10, 10]], r"Point\(s\) \[3\] touch the axis on their own"),  # a pinch
+    ],
+)
 def test_a_profile_must_stay_on_one_side_of_its_axis(s, profile, message):
     with pytest.raises(SolidWorksError, match=message):
         s.add_revolved_profile(profile, axis_mm=[[0, 0], [10, 10]])
@@ -862,23 +901,29 @@ def test_a_profile_that_meets_the_y_axis_in_one_point_is_refused_too(s):
 # --- planes at an angle, turned profiles ------------------------------------------
 
 
-@pytest.mark.parametrize("normal,axis,angle,expected", [
-    ((0, 0, 1), "y", 30, (0.5, 0, math.sqrt(3) / 2)),      # front turned about y: tips towards +x
-    ((0, 0, 1), "x", 90, (0, -1, 0)),                       # front about x, a quarter turn: faces -y
-    ((0, 1, 0), "z", 90, (-1, 0, 0)),                       # top about z
-    ((1, 0, 0), "y", -90, (0, 0, 1)),                       # right about y, the other way
-])
+@pytest.mark.parametrize(
+    "normal,axis,angle,expected",
+    [
+        ((0, 0, 1), "y", 30, (0.5, 0, math.sqrt(3) / 2)),  # front turned about y: tips towards +x
+        ((0, 0, 1), "x", 90, (0, -1, 0)),  # front about x, a quarter turn: faces -y
+        ((0, 1, 0), "z", 90, (-1, 0, 0)),  # top about z
+        ((1, 0, 0), "y", -90, (0, 0, 1)),  # right about y, the other way
+    ],
+)
 def test_a_turned_plane_follows_the_right_hand_rule(normal, axis, angle, expected):
     assert SolidWorksSession._turned_normal(normal, axis, angle) == pytest.approx(expected, abs=1e-12)
 
 
-@pytest.mark.parametrize("arguments,message", [
-    ({}, "Give offset_mm or angle_deg"),
-    ({"offset_mm": 5, "angle_deg": 30, "about": "y"}, "Give offset_mm or angle_deg"),
-    ({"angle_deg": 30, "about": "w"}, "about must be"),
-    ({"base": "front", "angle_deg": 30, "about": "z"}, "lies in the top and right planes"),
-    ({"base": "top", "angle_deg": 180, "about": "x"}, "between -180 and 180"),
-])
+@pytest.mark.parametrize(
+    "arguments,message",
+    [
+        ({}, "Give offset_mm or angle_deg"),
+        ({"offset_mm": 5, "angle_deg": 30, "about": "y"}, "Give offset_mm or angle_deg"),
+        ({"angle_deg": 30, "about": "w"}, "about must be"),
+        ({"base": "front", "angle_deg": 30, "about": "z"}, "lies in the top and right planes"),
+        ({"base": "top", "angle_deg": 180, "about": "x"}, "between -180 and 180"),
+    ],
+)
 def test_add_plane_checks_its_input(s, arguments, message):
     with pytest.raises(SolidWorksError, match=message):
         s.add_plane(**arguments)
@@ -930,12 +975,16 @@ def test_a_variable_fillet_gives_each_edge_end_its_radius():
     assert SolidWorksSession._vertex_radii(ends, [[0, 20, 10, 6], [40, 0, 10, 4]], 2) == [2, 4, 6]
 
 
-@pytest.mark.parametrize("radii_at,match", [
-    ([[20, 0, 10, 5]], r"No end of the edges at \(20, 0, 10\).*\(0, 0, 10\), \(40, 0, 10\)"),
-    ([[0, 0, 10, 5], [0, 0, 10.0001, 6]], "twice"),
-    ([[0, 0, 10, 0]], "radius > 0"),
-    ([[0, 0, 10]], r"\[x, y, z, radius\]"),
-], ids=["off the ends", "twice", "zero", "short"])
+@pytest.mark.parametrize(
+    "radii_at,match",
+    [
+        ([[20, 0, 10, 5]], r"No end of the edges at \(20, 0, 10\).*\(0, 0, 10\), \(40, 0, 10\)"),
+        ([[0, 0, 10, 5], [0, 0, 10.0001, 6]], "twice"),
+        ([[0, 0, 10, 0]], "radius > 0"),
+        ([[0, 0, 10]], r"\[x, y, z, radius\]"),
+    ],
+    ids=["off the ends", "twice", "zero", "short"],
+)
 def test_a_variable_fillet_refuses_radii_it_cannot_place(radii_at, match):
     with pytest.raises(SolidWorksError, match=match):
         SolidWorksSession._vertex_radii([(0.0, 0.0, 10.0), (40.0, 0.0, 10.0)], radii_at, 2)
@@ -943,13 +992,23 @@ def test_a_variable_fillet_refuses_radii_it_cannot_place(radii_at, match):
 
 def test_variable_fillet_radii_are_named_like_solidworks_does():
     """SolidWorks numbers them in the order of the radii it got (verified up to 12)."""
-    assert [SolidWorksSession._vertex_radius_dimension(k) for k in (0, 1, 2, 10, 11)] == \
-        ["D0", "D01", "D02", "D010", "D011"]
+    assert [SolidWorksSession._vertex_radius_dimension(k) for k in (0, 1, 2, 10, 11)] == [
+        "D0",
+        "D01",
+        "D02",
+        "D010",
+        "D011",
+    ]
 
 
 def test_a_full_round_takes_the_closest_pair_of_opposite_sides():
     """A rib 10 wide and 40 long: across its width, not along its length."""
-    sides = [((0, -1, 0), (20, 0, 15)), ((0, 1, 0), (20, 40, 15)), ((-1, 0, 0), (15, 20, 15)), ((1, 0, 0), (25, 20, 15))]
+    sides = [
+        ((0, -1, 0), (20, 0, 15)),
+        ((0, 1, 0), (20, 40, 15)),
+        ((-1, 0, 0), (15, 20, 15)),
+        ((1, 0, 0), (25, 20, 15)),
+    ]
     assert SolidWorksSession._full_round_sides(sides) == (2, 3, 10.0)
 
 
@@ -964,8 +1023,14 @@ def test_a_full_round_needs_one_closest_pair_of_opposite_sides():
 # --- equations -----------------------------------------------------------------------
 
 
-@pytest.mark.parametrize("equation,lhs", [('"L_thigh" = 85', "L_thigh"), ('"D1@Sketch1"=2*"L"', "D1@Sketch1"),
-                                          ('  "shin_stretch" = ("L_shin" - 56) / 54', "shin_stretch")])
+@pytest.mark.parametrize(
+    "equation,lhs",
+    [
+        ('"L_thigh" = 85', "L_thigh"),
+        ('"D1@Sketch1"=2*"L"', "D1@Sketch1"),
+        ('  "shin_stretch" = ("L_shin" - 56) / 54', "shin_stretch"),
+    ],
+)
 def test_an_equation_is_named_by_its_left_hand_side(equation, lhs):
     assert SolidWorksSession._equation_lhs(equation) == lhs
 
@@ -997,9 +1062,11 @@ class _Plane:
 # IRefPlane.Transform of each default plane (x axis, y axis, normal, origin) in a
 # part from a Z-up template: every plane turned, so none has the Y-up axes the
 # tools build in. A user's selftest log showed the Front plane facing +x.
-_Z_UP_PLANES = {"Front Plane": (0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0),
-                "Top Plane": (0, 1, 0, -1, 0, 0, 0, 0, 1, 0, 0, 0),
-                "Right Plane": (-1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0)}
+_Z_UP_PLANES = {
+    "Front Plane": (0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0),
+    "Top Plane": (0, 1, 0, -1, 0, 0, 0, 0, 1, 0, 0, 0),
+    "Right Plane": (-1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0),
+}
 
 
 def _with_planes(s, monkeypatch, transforms):
@@ -1014,8 +1081,9 @@ def test_a_part_from_a_z_up_template_is_refused_by_name(s, monkeypatch, key):
     _with_planes(s, monkeypatch, _Z_UP_PLANES)
     with pytest.raises(SolidWorksError) as refused:
         s._default_plane(key)
-    assert "Z-up" in str(refused.value) and "Y-up" in str(refused.value), \
+    assert "Z-up" in str(refused.value) and "Y-up" in str(refused.value), (
         f"a Z-up part was not named as such: {refused.value}"
+    )
 
 
 def test_other_turned_planes_are_not_called_z_up(s, monkeypatch):
@@ -1027,9 +1095,15 @@ def test_other_turned_planes_are_not_called_z_up(s, monkeypatch):
 
 @pytest.mark.parametrize("key,name", [("front", "Front Plane"), ("top", "Top Plane"), ("right", "Right Plane")])
 def test_the_y_up_planes_are_found_in_any_order(s, monkeypatch, key, name):
-    _with_planes(s, monkeypatch, {"Right Plane": (0, 0, -1, 0, 1, 0, 1, 0, 0, 0, 0, 0),
-                                  "Top Plane": (1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 0),
-                                  "Front Plane": (1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)})
+    _with_planes(
+        s,
+        monkeypatch,
+        {
+            "Right Plane": (0, 0, -1, 0, 1, 0, 1, 0, 0, 0, 0, 0),
+            "Top Plane": (1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0, 0),
+            "Front Plane": (1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0),
+        },
+    )
     assert s._default_plane(key).Name == name
 
 
@@ -1038,16 +1112,18 @@ def test_the_y_up_planes_are_found_in_any_order(s, monkeypatch, key, name):
 
 # a localized material database as SolidWorks writes it: the same matid per
 # material, the names in the user's language
-_CHINESE_MATERIALS = ('<?xml version="1.0" encoding="utf-16"?>\n'
-                      '<mstns:materials xmlns:mstns="http://www.solidworks.com/sldmaterials" version="2008.03">\n'
-                      '  <classification name="钢">\n'
-                      '    <material name="普通碳钢" matid="9" envdata="1">\n    </material>\n'
-                      '    <material name="AISI 1020" matid="2" envdata="1">\n    </material>\n'
-                      '  </classification>\n'
-                      '  <classification name="铝合金">\n'
-                      '    <material name="6061 合金" matid="21" envdata="1">\n    </material>\n'
-                      '  </classification>\n'
-                      '</mstns:materials>\n')
+_CHINESE_MATERIALS = (
+    '<?xml version="1.0" encoding="utf-16"?>\n'
+    '<mstns:materials xmlns:mstns="http://www.solidworks.com/sldmaterials" version="2008.03">\n'
+    '  <classification name="钢">\n'
+    '    <material name="普通碳钢" matid="9" envdata="1">\n    </material>\n'
+    '    <material name="AISI 1020" matid="2" envdata="1">\n    </material>\n'
+    "  </classification>\n"
+    '  <classification name="铝合金">\n'
+    '    <material name="6061 合金" matid="21" envdata="1">\n    </material>\n'
+    "  </classification>\n"
+    "</mstns:materials>\n"
+)
 
 
 def test_a_material_database_is_read_by_id():
@@ -1059,8 +1135,9 @@ def test_an_english_material_name_finds_its_translation(english, local):
     """A Chinese SolidWorks refused '6061 Alloy' (its database says '6061 合金'),
     and every agent writes the English names the docs give."""
     local_by_id = SolidWorksSession._materials_by_id(_CHINESE_MATERIALS)
-    assert SolidWorksSession._localized_material(english, local_by_id) == local, \
+    assert SolidWorksSession._localized_material(english, local_by_id) == local, (
         f"'{english}' was not found in a Chinese material database"
+    )
 
 
 def test_a_name_the_english_database_lacks_has_no_translation():
@@ -1077,12 +1154,16 @@ class _Feature:
 def test_list_dimensions_keeps_those_whose_name_or_feature_holds_the_text(s, monkeypatch):
     """On a part of 333 features the full list was 149 kB, too large to come
     back to the agent."""
-    features = {"BlockExtrude": ["D1@BlockExtrude", "width@Sketch1"], "DcdcPadR": ["D1@DcdcPadR"],
-                "Fillet3": ["D1@Fillet3"]}
+    features = {
+        "BlockExtrude": ["D1@BlockExtrude", "width@Sketch1"],
+        "DcdcPadR": ["D1@DcdcPadR"],
+        "Fillet3": ["D1@Fillet3"],
+    }
     monkeypatch.setattr(s, "_require_part", lambda: None)
     monkeypatch.setattr(s, "_iter_features", lambda: [_Feature(name) for name in features])
-    monkeypatch.setattr(s, "_dimension_entries", lambda feat: [{"name": n, "feature": feat.Name}
-                                                               for n in features[feat.Name]])
+    monkeypatch.setattr(
+        s, "_dimension_entries", lambda feat: [{"name": n, "feature": feat.Name} for n in features[feat.Name]]
+    )
     assert [d["name"] for d in s.list_dimensions(contains="dcdc")["dimensions"]] == ["D1@DcdcPadR"]
     assert [d["name"] for d in s.list_dimensions(contains="Sketch1")["dimensions"]] == ["width@Sketch1"]
     assert s.list_dimensions()["count"] == 4
@@ -1091,7 +1172,8 @@ def test_list_dimensions_keeps_those_whose_name_or_feature_holds_the_text(s, mon
 def test_the_wall_check_stops_in_time_and_says_how_much_it_measured(s, monkeypatch):
     """24064 rays took 151 s on a small cap, past the 120 s a call may take:
     the agent got 'a modal dialog is probably open' and no result at all."""
-    import solidworks_mcp.session as session_module
+    import solidworks_mcp.session.printability as session_module
+
     clock = iter(range(0, 10_000, 40))  # every look at the clock, 40 s later
     monkeypatch.setattr(session_module.time, "monotonic", lambda: next(clock))
     cast = []

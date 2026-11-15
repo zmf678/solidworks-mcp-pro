@@ -50,8 +50,9 @@ def test_the_ends_of_an_edge_resting_only_in_the_middle_are_unsupported(part):
     assert found["overhang"]["faces"] == [] and found["islands"] == []
     ends = found["unsupported_edges"]
     assert len(ends) == 2, f"the free ends of the pad's edge were not both found: {ends}"
-    assert all(e["length_mm"] == pytest.approx(10, abs=1) and e["height_mm"] == pytest.approx(19, abs=1e-3)
-               for e in ends), ends
+    assert all(
+        e["length_mm"] == pytest.approx(10, abs=1) and e["height_mm"] == pytest.approx(19, abs=1e-3) for e in ends
+    ), ends
     assert sorted(e["at_mm"][0] for e in ends) == pytest.approx([5, 35], abs=1)
 
 

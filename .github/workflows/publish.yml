@@ -1,8 +1,7 @@
-# Publishes a GitHub release to PyPI (trusted publishing) and then to the
-# MCP Registry (GitHub OIDC). No stored secrets: both logins use the job's
-# OIDC token, which PyPI only accepts once this workflow is registered there
-# as the trusted publisher for "solidworks-mcp".
-name: Publish
+# Upstream-only publishing. This fork keeps the workflow for reference, but the
+# publish jobs are guarded so a release in zmf678/solidworks-mcp-pro can never
+# overwrite the upstream PyPI package or MCP Registry entry.
+name: Publish (upstream repository only)
 
 on:
   release:
@@ -20,6 +19,7 @@ jobs:
 
   pypi:
     needs: test
+    if: github.repository == 'hjbaard/SolidWorks-MCP'
     runs-on: ubuntu-latest
     environment:
       name: pypi
@@ -37,6 +37,7 @@ jobs:
 
   mcp-registry:
     needs: pypi
+    if: github.repository == 'hjbaard/SolidWorks-MCP'
     runs-on: ubuntu-latest
     permissions:
       id-token: write

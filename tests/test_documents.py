@@ -26,8 +26,9 @@ def test_an_unsaved_part_can_be_made_current_again(sw):
             sw.add_box(5, 5, 5)
         back = sw.activate_document(first["title"])
         assert back["current"] == first["title"] and back["path"] == "" and back["modified"]
-        assert sw.add_hole(2, 5, 5)["mass_properties"]["volume_mm3"] == pytest.approx(1000 - math.pi * 10), \
+        assert sw.add_hole(2, 5, 5)["mass_properties"]["volume_mm3"] == pytest.approx(1000 - math.pi * 10), (
             "the hole should go into the first part"
+        )
     finally:
         sw._sw.CloseDoc(first["title"])
         sw._model = None

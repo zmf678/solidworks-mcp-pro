@@ -55,22 +55,22 @@ def _check_dimension(sw):
 
 def _check_hole(sw):
     _block(sw)
-    return _volume(sw.add_hole(6, 10, 10), BLOCK_MM3 - math.pi * 3 ** 2 * 10)
+    return _volume(sw.add_hole(6, 10, 10), BLOCK_MM3 - math.pi * 3**2 * 10)
 
 
 def _check_side_hole(sw):
     _block(sw)
-    return _volume(sw.add_hole_on_face(4, "+x", 40, 10, 5, depth_mm=5), BLOCK_MM3 - math.pi * 2 ** 2 * 5)
+    return _volume(sw.add_hole_on_face(4, "+x", 40, 10, 5, depth_mm=5), BLOCK_MM3 - math.pi * 2**2 * 5)
 
 
 def _check_fillet(sw):
     _block(sw)
-    return _volume(sw.add_fillet(2, edges="z"), BLOCK_MM3 - 4 * (1 - math.pi / 4) * 2 ** 2 * 10)
+    return _volume(sw.add_fillet(2, edges="z"), BLOCK_MM3 - 4 * (1 - math.pi / 4) * 2**2 * 10)
 
 
 def _check_cylinder(sw):
     sw.new_part()
-    return _volume(sw.add_cylinder(20, 20), math.pi * 10 ** 2 * 20, tolerance=0.1)
+    return _volume(sw.add_cylinder(20, 20), math.pi * 10**2 * 20, tolerance=0.1)
 
 
 def _check_hole_wizard(sw):
@@ -79,7 +79,7 @@ def _check_hole_wizard(sw):
     diameter = hole["hole"]["diameter_mm"]
     if abs(diameter - 3.4) > 1e-6:
         raise CheckFailed(f"an ISO 273 normal M3 clearance hole is 3.4 mm; the Hole Wizard drilled {diameter} mm")
-    return f"{_volume(hole, BLOCK_MM3 - math.pi * 1.7 ** 2 * 10)}, diameter {diameter} mm"
+    return f"{_volume(hole, BLOCK_MM3 - math.pi * 1.7**2 * 10)}, diameter {diameter} mm"
 
 
 def _check_thread(sw):
@@ -107,7 +107,7 @@ def _check_mirror(sw):
     sw.new_part()
     sw.add_disc(40, 10)
     sw.add_hole(6, 10, 0, name="Hole")
-    return _volume(sw.add_mirror("right", features=["Hole"]), math.pi * (20 ** 2 - 2 * 3 ** 2) * 10)
+    return _volume(sw.add_mirror("right", features=["Hole"]), math.pi * (20**2 - 2 * 3**2) * 10)
 
 
 def _check_text(sw):
@@ -223,15 +223,20 @@ def _report_hint() -> None:
     entries = importlib.metadata.metadata("solidworks-mcp").get_all("Project-URL") or []
     urls = dict(entry.split(", ", 1) for entry in entries)
     print("Please report the result, whether it worked or not:")
-    print(f"{urls['Issues']}/new?template=compatibility.yml" if "Issues" in urls
-          else "on the project's issue tracker (this install's metadata has no link: reinstall solidworks-mcp)")
+    print(
+        f"{urls['Issues']}/new?template=compatibility.yml"
+        if "Issues" in urls
+        else "on the project's issue tracker (this install's metadata has no link: reinstall solidworks-mcp)"
+    )
 
 
 def main(sw) -> int:
     """Print the report for `sw`, the server's session; return the exit code."""
     print(f"solidworks-mcp {__version__} selftest")
-    print(f"Python {platform.python_version()} on {platform.platform()}, "
-          f"pywin32 {_version_of('pywin32')}, mcp {_version_of('mcp')}")
+    print(
+        f"Python {platform.python_version()} on {platform.platform()}, "
+        f"pywin32 {_version_of('pywin32')}, mcp {_version_of('mcp')}"
+    )
     try:
         sw.connect()
         info = sw.describe_installation()

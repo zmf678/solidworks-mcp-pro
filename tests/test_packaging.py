@@ -41,6 +41,5 @@ def test_readme_carries_the_registry_ownership_marker():
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
 
     assert f"mcp-name: {_server()['name']}" in readme, (
-        "the MCP Registry rejects the publish: the PyPI description (README.md) "
-        "must contain 'mcp-name: <server name>'"
+        "the MCP Registry rejects the publish: the PyPI description (README.md) must contain 'mcp-name: <server name>'"
     )

@@ -55,8 +55,9 @@ def test_the_outline_runs_round_the_region_close_to_its_edge():
     points = region["outline_mm"]
     signed = sum(x1 * y2 - x2 * y1 for (x1, y1), (x2, y2) in zip(points, points[1:] + points[:1])) / 2
     assert signed > 0, "the outline runs clockwise"
-    assert all(min(abs(x), abs(x - 10)) <= 0.15 or min(abs(y), abs(y - 10)) <= 0.15 for x, y in points), \
+    assert all(min(abs(x), abs(x - 10)) <= 0.15 or min(abs(y), abs(y - 10)) <= 0.15 for x, y in points), (
         "a point of the outline lies off the square's edge"
+    )
     assert len(points) < 40, f"{len(points)} points for a square: the grid's steps were not smoothed out"
 
 

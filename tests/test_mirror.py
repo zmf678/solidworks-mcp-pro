@@ -13,8 +13,8 @@ from solidworks_mcp.errors import SolidWorksError
 
 pytestmark = pytest.mark.solidworks
 
-DISC = math.pi * 20 ** 2 * 10
-HOLE = math.pi * 3 ** 2 * 10  # Ø6 through the disc
+DISC = math.pi * 20**2 * 10
+HOLE = math.pi * 3**2 * 10  # Ø6 through the disc
 
 
 def vol(result):
@@ -59,7 +59,7 @@ def test_mirrored_copies_follow_their_seed(part):
 
     resized = part.set_dimension(hole["dimensions"]["diameter"], 8)
 
-    assert abs(vol(resized) - (DISC - 2 * math.pi * 4 ** 2 * 10)) < 0.01, "the mirrored hole kept its old size"
+    assert abs(vol(resized) - (DISC - 2 * math.pi * 4**2 * 10)) < 0.01, "the mirrored hole kept its old size"
 
 
 def test_a_mirror_plane_tied_to_the_width_keeps_the_part_symmetric(part):
