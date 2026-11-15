@@ -12,8 +12,8 @@ from solidworks_mcp.constants import SW_TOGGLE_3D_INTERCONNECT
 from solidworks_mcp.errors import SolidWorksError
 from solidworks_mcp.session import SolidWorksSession
 
-BLOCK_WITH_HOLE = 8000 - math.pi * 3 ** 2 * 10  # 40 x 20 x 10 with a Ø6 through hole
-SIDE_HOLE = math.pi * 2 ** 2 * 5                 # Ø4 x 5 blind
+BLOCK_WITH_HOLE = 8000 - math.pi * 3**2 * 10  # 40 x 20 x 10 with a Ø6 through hole
+SIDE_HOLE = math.pi * 2**2 * 5  # Ø4 x 5 blind
 
 
 def vol(result):

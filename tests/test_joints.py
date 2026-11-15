@@ -24,8 +24,11 @@ def linkage_parts(sw, tmp_path_factory):
     # name, and closing by title closed theirs
     directory = tmp_path_factory.mktemp("linkage")
     paths = {}
-    for name, size, hole_at in (("link_thigh", (60, 10, 5), (5, 5)), ("link_shin", (60, 10, 5), (55, 5)),
-                                ("link_stop", (20, 70, 20), None)):
+    for name, size, hole_at in (
+        ("link_thigh", (60, 10, 5), (5, 5)),
+        ("link_shin", (60, 10, 5), (55, 5)),
+        ("link_stop", (20, 70, 20), None),
+    ):
         sw.new_part()
         sw.add_box(*size)
         if hole_at:
@@ -70,7 +73,9 @@ def shin_size(session):
 
 
 def test_concentric_mate_puts_the_hole_on_the_other_holes_axis(linkage):
-    mated = linkage.add_mate("link_shin", hole(linkage, "link_shin"), "link_thigh", hole(linkage, "link_thigh"), "concentric")
+    mated = linkage.add_mate(
+        "link_shin", hole(linkage, "link_shin"), "link_thigh", hole(linkage, "link_thigh"), "concentric"
+    )
     assert mated["axis_offset_mm"] == pytest.approx(0, abs=1e-4)
     # checked apart from the mate's own measurement: the thigh's hole axis
     # (x 5, y 5) now runs through the shin's hole, 2 mm from its wall
@@ -129,7 +134,9 @@ def test_check_motion_steps_the_knee_and_finds_the_clash(linkage):
     assert by_angle[30]["interferences"] == [] and by_angle[90]["interferences"] == []
     assert by_angle[90]["distances"][0]["distance_mm"] == pytest.approx(10, abs=1e-3)
     assert motion["clash_free"] is False
-    assert motion["smallest_distances"] == [{"between": ["link_shin-1", "link_stop-1"], "distance_mm": 0, "at_deg": 150}]
+    assert motion["smallest_distances"] == [
+        {"between": ["link_shin-1", "link_stop-1"], "distance_mm": 0, "at_deg": 150}
+    ]
     assert shin_size(linkage) == pytest.approx([10, 60, 5], abs=1e-3), "the knee was not put back at 90"
 
 
@@ -251,7 +258,9 @@ def test_stepping_a_joint_with_a_broken_mate_is_refused(sw, tmp_path):
         [entry] = [m for m in sw.list_components()["mates"] if m["name"] == held]
         assert "broken" in entry["error"]["cause"], entry
         rebuilt = sw.rebuild()
-        assert held in [m["name"] for m in rebuilt["mate_errors"]], f"rebuild kept quiet about a mate that holds nothing: {rebuilt}"
+        assert held in [m["name"] for m in rebuilt["mate_errors"]], (
+            f"rebuild kept quiet about a mate that holds nothing: {rebuilt}"
+        )
         with pytest.raises(SolidWorksError, match=rf"{held} \(broken"):
             sw.check_motion(angle["dimension"], [60, 90])
     finally:

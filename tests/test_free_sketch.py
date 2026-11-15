@@ -52,25 +52,42 @@ def test_a_spline_adds_its_through_points():
 
 def test_a_tangent_line_lands_on_the_tangent():
     """Within a micrometre the end is put on the tangent, as asked."""
-    chain = build_chain([0, 0], [{"line": [40, 0]}, {"arc": [40, 20], "tangent": True},
-                                 {"line": [10, 20.0004], "tangent": True}])
+    chain = build_chain(
+        [0, 0], [{"line": [40, 0]}, {"arc": [40, 20], "tangent": True}, {"line": [10, 20.0004], "tangent": True}]
+    )
     assert chain.points[chain.user_points[3]] == pytest.approx((10, 20), abs=1e-12)
 
 
-@pytest.mark.parametrize("segments,match", [
-    ([{"arc": [10, 10], "tangent": True}], "first segment"),
-    ([{"line": [40, 0]}, {"arc": [60, 0], "tangent": True}], "straight"),
-    ([{"line": [40, 0]}, {"arc": [60, 0], "through": [50, 0]}], "in one line"),
-    ([{"line": [40, 0]}, {"arc": [40, 20], "tangent": True}, {"line": [10, 21], "tangent": True}],
-     r"does not continue.*\(-1, 0\)"),
-    ([{"line": [0, 0]}], "zero length"),
-    ([{"curve": [10, 0]}], "line, arc or spline"),
-    ([{"line": [40, 0]}, {"arc": [40, 20]}], "through.*tangent"),
-    ([{"spline": [[10, 5], [20, 0]]}, {"arc": [30, 10], "tangent": True}], "spline"),
-    ([], "at least one segment"),
-    ([{"line": [40, 0]}, {"line": [40, 20]}, {"line": [40, 0]}], "twice"),
-], ids=["first tangent", "straight arc", "collinear arc", "off the tangent", "zero length", "unknown",
-        "arc without how", "tangent after spline", "empty", "crosses itself"])
+@pytest.mark.parametrize(
+    "segments,match",
+    [
+        ([{"arc": [10, 10], "tangent": True}], "first segment"),
+        ([{"line": [40, 0]}, {"arc": [60, 0], "tangent": True}], "straight"),
+        ([{"line": [40, 0]}, {"arc": [60, 0], "through": [50, 0]}], "in one line"),
+        (
+            [{"line": [40, 0]}, {"arc": [40, 20], "tangent": True}, {"line": [10, 21], "tangent": True}],
+            r"does not continue.*\(-1, 0\)",
+        ),
+        ([{"line": [0, 0]}], "zero length"),
+        ([{"curve": [10, 0]}], "line, arc or spline"),
+        ([{"line": [40, 0]}, {"arc": [40, 20]}], "through.*tangent"),
+        ([{"spline": [[10, 5], [20, 0]]}, {"arc": [30, 10], "tangent": True}], "spline"),
+        ([], "at least one segment"),
+        ([{"line": [40, 0]}, {"line": [40, 20]}, {"line": [40, 0]}], "twice"),
+    ],
+    ids=[
+        "first tangent",
+        "straight arc",
+        "collinear arc",
+        "off the tangent",
+        "zero length",
+        "unknown",
+        "arc without how",
+        "tangent after spline",
+        "empty",
+        "crosses itself",
+    ],
+)
 def test_a_chain_refuses_what_it_cannot_draw(segments, match):
     with pytest.raises(SolidWorksError, match=match):
         build_chain([0, 0], segments)
@@ -89,8 +106,9 @@ def test_a_stadium_needs_only_its_length_and_height():
 
 def test_a_free_arc_gets_a_radius():
     """An arc that is tangent to nothing needs its radius dimensioned."""
-    chain = build_chain([0, 0], [{"line": [40, 0]}, {"arc": [40, 20], "through": [45, 10]}, {"line": [0, 20]},
-                                 {"line": [0, 0]}])
+    chain = build_chain(
+        [0, 0], [{"line": [40, 0]}, {"arc": [40, 20], "through": [45, 10]}, {"line": [0, 20]}, {"line": [0, 0]}]
+    )
     plan = plan_chain(chain)
     assert not kinds(plan, "tangent")
     assert ("radius", 1, pytest.approx(12.5)) in [(d[0], d[1], d[2]) for d in plan.dimensions]
@@ -102,10 +120,15 @@ def test_concentric_arcs_whose_chords_share_a_bisector_get_a_radius():
     Both chords then share one bisector, so the arcs' ends barely hold their
     shared centre (a rank residual of 2e-6, from the inputs' rounding), and
     SolidWorks saw it free. A radius holds it instead of the last coordinate."""
-    chain = build_chain([97.8839, 9.2771], [{"line": [99.4276, 13.9118]},
-                                            {"arc": [90.3697, -13.2832], "through": [107.31, 1.01]},
-                                            {"line": [91.9134, -8.6485]},
-                                            {"arc": [97.8839, 9.2771], "through": [102.51, 1.01]}])
+    chain = build_chain(
+        [97.8839, 9.2771],
+        [
+            {"line": [99.4276, 13.9118]},
+            {"arc": [90.3697, -13.2832], "through": [107.31, 1.01]},
+            {"line": [91.9134, -8.6485]},
+            {"arc": [97.8839, 9.2771], "through": [102.51, 1.01]},
+        ],
+    )
     plan = plan_chain(chain)
     assert [d[0] for d in plan.dimensions].count("radius") == 1 and len(plan.dimensions) == 8
     assert plan.fully_defined
@@ -114,8 +137,18 @@ def test_concentric_arcs_whose_chords_share_a_bisector_get_a_radius():
 def test_a_relation_that_follows_from_others_is_left_out():
     """A straight continuation is collinear with the line before it; its own
     horizontal relation would then over-define the sketch."""
-    plan = plan_chain(build_chain([0, 0], [{"line": [20, 0]}, {"line": [40, 0], "tangent": True},
-                                           {"line": [40, 10]}, {"line": [0, 10]}, {"line": [0, 0]}]))
+    plan = plan_chain(
+        build_chain(
+            [0, 0],
+            [
+                {"line": [20, 0]},
+                {"line": [40, 0], "tangent": True},
+                {"line": [40, 10]},
+                {"line": [0, 10]},
+                {"line": [0, 0]},
+            ],
+        )
+    )
     assert len(kinds(plan, "collinear")) == 1
     assert len(kinds(plan, "horizontal")) == 2, "the first side and the top, not the continued side"
     assert plan.fully_defined
@@ -137,9 +170,16 @@ def test_points_on_the_axes_get_relations_not_zero_dimensions():
 
 def test_a_plan_removes_every_degree_of_freedom_once():
     """Whatever the chain, the constraints add up to two per point."""
-    chain = build_chain([5, 5], [{"line": [45, 5]}, {"arc": [55, 15], "tangent": True},
-                                 {"arc": [65, 25], "tangent": True}, {"spline": [[50, 40], [20, 35]]},
-                                 {"arc": [5, 5], "through": [8, 22]}])
+    chain = build_chain(
+        [5, 5],
+        [
+            {"line": [45, 5]},
+            {"arc": [55, 15], "tangent": True},
+            {"arc": [65, 25], "tangent": True},
+            {"spline": [[50, 40], [20, 35]]},
+            {"arc": [5, 5], "through": [8, 22]},
+        ],
+    )
     plan = plan_chain(chain)
     removed = sum(2 if r[0] == "at_origin" else 1 for r in plan.relations) + len(plan.dimensions)
     inherent = sum(1 for e in chain.entities if e[0] == "arc")
@@ -148,8 +188,9 @@ def test_a_plan_removes_every_degree_of_freedom_once():
 
 
 def test_roles_follow_the_points_and_segments_given():
-    chain = build_chain([0, 0], [{"line": [40, 0]}, {"arc": [40, 20], "through": [45, 10]}, {"line": [0, 20]},
-                                 {"line": [0, 0]}])
+    chain = build_chain(
+        [0, 0], [{"line": [40, 0]}, {"arc": [40, 20], "through": [45, 10]}, {"line": [0, 20]}, {"line": [0, 0]}]
+    )
     plan = plan_chain(chain)
     assert {plan.role(d) for d in plan.dimensions} == {"x1", "x2", "y2", "r1"}
 
@@ -168,11 +209,15 @@ def test_an_arc_end_a_hair_off_its_circle_is_put_on_it():
     assert math.hypot(*chain.points[1]) == pytest.approx(30, abs=1e-12)
 
 
-@pytest.mark.parametrize("segments,match", [
-    ([{"arc": [0, 11], "center": [0, 0]}], "not on one circle"),
-    ([{"arc": [-10, 0], "center": [0, 0]}], "half circle"),
-    ([{"line": [20, 0]}, {"arc": [20, 10], "center": [20, 5], "tangent": True}], "center or tangent"),
-], ids=["off the circle", "half circle", "both"])
+@pytest.mark.parametrize(
+    "segments,match",
+    [
+        ([{"arc": [0, 11], "center": [0, 0]}], "not on one circle"),
+        ([{"arc": [-10, 0], "center": [0, 0]}], "half circle"),
+        ([{"line": [20, 0]}, {"arc": [20, 10], "center": [20, 5], "tangent": True}], "center or tangent"),
+    ],
+    ids=["off the circle", "half circle", "both"],
+)
 def test_an_arc_round_a_centre_refuses_what_is_unclear(segments, match):
     with pytest.raises(SolidWorksError, match=match):
         build_chain([10, 0], segments)
@@ -183,8 +228,15 @@ def test_centres_closer_than_solidworks_tells_apart_are_one_point():
     off the origin and 0.02 um apart; SolidWorks merges such points, so the
     chain does too, and a centre that close to the origin goes onto it."""
     c, d = 7.07107, 14.14214  # 10 and 20 times cos 45, rounded
-    chain = build_chain([10, 0], [{"arc": [0, 10], "through": [c, c]}, {"line": [0, 20]},
-                                  {"arc": [20, 0], "through": [d, d]}, {"line": [10, 0]}])
+    chain = build_chain(
+        [10, 0],
+        [
+            {"arc": [0, 10], "through": [c, c]},
+            {"line": [0, 20]},
+            {"arc": [20, 0], "through": [d, d]},
+            {"line": [10, 0]},
+        ],
+    )
     centres = {e[3] for e in chain.entities if e[0] == "arc"}
     assert len(centres) == 1 and chain.points[centres.pop()] == (0.0, 0.0)
     plan = plan_chain(chain)

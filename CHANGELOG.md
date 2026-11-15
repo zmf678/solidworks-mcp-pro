@@ -3,6 +3,26 @@
 All notable changes to this project are documented here. This project follows
 [Semantic Versioning](https://semver.org/).
 
+## [Unreleased] — engineering hardening
+
+### Changed
+- Split the 6,646-line `session.py` (346 methods) into a `session/` package of
+  23 domain mixins. `SolidWorksSession` keeps the same public class, method names
+  and behaviour; method bodies were moved verbatim.
+- Split the flat `server.py` tool list into `app.py` plus seven domain modules
+  under `tools/`. `server.py` is now a thin entry point and re-export facade; all
+  88 MCP tool names are unchanged.
+- Added PR CI: Ruff lint/format, mypy on the core modules, Windows unit tests
+  with coverage, and a package build check.
+- Added `uv.lock`, Dependabot, PR template, contribution/security/conduct docs,
+  engineering standards and an architecture guide.
+- Guarded the upstream publish workflow so this fork cannot publish the upstream
+  PyPI package or MCP Registry entry.
+
+### Fixed
+- The stdio portability test now reads/writes UTF-8 explicitly, so it no longer
+  fails under a non-UTF-8 Windows locale.
+
 ## [0.20.0] — 2026-11-13
 
 ### Changed

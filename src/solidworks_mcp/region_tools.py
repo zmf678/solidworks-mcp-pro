@@ -38,8 +38,7 @@ def swept_outline(sections, tolerance_mm: float, margin_mm: float = 0.0) -> list
         _fill(grid, loops, u0, v0, resolution_mm)
     if margin_mm > 0:
         grid = _grow(grid, margin_mm / resolution_mm)
-    loops = [[(u0 + c * resolution_mm, v0 + r * resolution_mm) for c, r in _smooth(loop, 1.5)]
-             for loop in _trace(grid)]
+    loops = [[(u0 + c * resolution_mm, v0 + r * resolution_mm) for c, r in _smooth(loop, 1.5)] for loop in _trace(grid)]
     outers = [loop for loop in loops if _signed_area(loop) > 0]
     holes = [loop for loop in loops if _signed_area(loop) < 0]
     regions = []
@@ -47,9 +46,13 @@ def swept_outline(sections, tolerance_mm: float, margin_mm: float = 0.0) -> list
         inside = [hole for hole in holes if _inside(hole[0], outer)]
         holes = [hole for hole in holes if hole not in inside]
         area = _signed_area(outer) + sum(_signed_area(hole) for hole in inside)
-        regions.append({"outline_mm": [_rounded(p) for p in outer],
-                        "holes_mm": [[_rounded(p) for p in hole] for hole in inside],
-                        "area_mm2": round(area, 3)})
+        regions.append(
+            {
+                "outline_mm": [_rounded(p) for p in outer],
+                "holes_mm": [[_rounded(p) for p in hole] for hole in inside],
+                "area_mm2": round(area, 3),
+            }
+        )
     return regions
 
 
@@ -170,7 +173,7 @@ def _smooth(loop, tolerance) -> list:
     if len(loop) < 4:
         return loop
     far = max(range(len(loop)), key=lambda k: math.dist(loop[0], loop[k]))
-    first = _douglas_peucker(loop[:far + 1], tolerance)
+    first = _douglas_peucker(loop[: far + 1], tolerance)
     second = _douglas_peucker(loop[far:] + loop[:1], tolerance)
     return first[:-1] + second[:-1]
 
@@ -187,7 +190,11 @@ def _douglas_peucker(points, tolerance) -> list:
         worst, at = -1.0, i
         for k in range(i + 1, j):
             px, py = points[k]
-            d = (abs((bx - ax) * (py - ay) - (by - ay) * (px - ax)) / length) if length else math.hypot(px - ax, py - ay)
+            d = (
+                (abs((bx - ax) * (py - ay) - (by - ay) * (px - ax)) / length)
+                if length
+                else math.hypot(px - ax, py - ay)
+            )
             if d > worst:
                 worst, at = d, k
         if worst > tolerance:

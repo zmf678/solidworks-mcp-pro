@@ -23,8 +23,7 @@ BLOCK_B = [20.0, 20.0, 20.0]
 
 def only(session, name):
     """The one component whose name starts with `name`."""
-    matches = [c for c in session.list_components()["components"]
-               if c["name"].lower().startswith(name)]
+    matches = [c for c in session.list_components()["components"] if c["name"].lower().startswith(name)]
     assert len(matches) == 1, f"expected one '{name}', got {[c['name'] for c in matches]}"
     return matches[0]
 
@@ -147,8 +146,7 @@ def test_set_component_transform_rotates(assembly, blocks):
     turned = assembly.set_component_transform("block_a", 0, 0, 0, rz_deg=90)
     assert turned["rotation_deg"] == pytest.approx([0.0, 0.0, 90.0], abs=1e-6)
     # a 90-degree turn about Z swaps the block's X and Y extents
-    assert turned["bounding_box_mm"]["size_mm"] == pytest.approx(
-        [BLOCK_A[1], BLOCK_A[0], BLOCK_A[2]], abs=1e-6)
+    assert turned["bounding_box_mm"]["size_mm"] == pytest.approx([BLOCK_A[1], BLOCK_A[0], BLOCK_A[2]], abs=1e-6)
 
 
 def test_set_component_transform_unknown_name_raises(assembly, blocks):
@@ -163,8 +161,7 @@ def test_set_component_transform_unknown_name_raises(assembly, blocks):
 def test_distance_mate_moves_the_component(assembly, blocks):
     # block_a spans x 0..40; a 5 mm gap to block_b's -X face puts block_b at x=45
     two_blocks(assembly, blocks, b_at=(100.0, 0.0, 0.0))
-    mate = assembly.add_mate("block_b", "-x", "block_a", "+x",
-                             mate_type="distance", distance_mm=5)
+    mate = assembly.add_mate("block_b", "-x", "block_a", "+x", mate_type="distance", distance_mm=5)
     assert mate["distance_mm"] == pytest.approx(5.0, abs=1e-3)
     assert only(assembly, "block_b")["position_mm"][0] == pytest.approx(45.0, abs=1e-3)
 
@@ -188,8 +185,7 @@ def test_flip_puts_the_distance_on_the_other_side(assembly, blocks):
     # (x=45) or reaching 5 mm into it (x=35). flip picks the other one, and the
     # measured perpendicular distance is 5 mm either way.
     two_blocks(assembly, blocks, b_at=(100.0, 0.0, 0.0))
-    mate = assembly.add_mate("block_b", "-x", "block_a", "+x",
-                             mate_type="distance", distance_mm=5, flip=True)
+    mate = assembly.add_mate("block_b", "-x", "block_a", "+x", mate_type="distance", distance_mm=5, flip=True)
     assert mate["distance_mm"] == pytest.approx(5.0, abs=1e-3)
     assert only(assembly, "block_b")["position_mm"][0] == pytest.approx(35.0, abs=1e-3)
 
@@ -271,8 +267,11 @@ def test_a_turned_round_part_keeps_its_own_box(sw, disc):
     finally:
         sw.close_part()
         sw._sw.CloseDoc(disc)
-    for label, box in (("set_component_transform", turned["bounding_box_mm"]),
-                       ("list_components", listed["bounding_box_mm"]), ("get_assembly_bounding_box", whole)):
+    for label, box in (
+        ("set_component_transform", turned["bounding_box_mm"]),
+        ("list_components", listed["bounding_box_mm"]),
+        ("get_assembly_bounding_box", whole),
+    ):
         assert box["min_mm"] == pytest.approx([-10, -10, 0], abs=1e-4), f"{label} boxes the turned disc too big: {box}"
         assert box["size_mm"] == pytest.approx([20, 20, 10], abs=1e-4), f"{label} boxes the turned disc too big: {box}"
 
@@ -301,8 +300,9 @@ def test_a_sub_assembly_is_measured_through_its_parts(sw, blocks, tmp_path):
     # block_a (x 0..40, y 0..20) sits at x = 10 in the sub-assembly, which is
     # turned 90 degrees about Z and moved to y = 100: x -20..0, y 110..150
     assert box is not None, "the sub-assembly got no box: its parts were not searched"
-    assert box["min_mm"] == pytest.approx([-20, 110, 0], abs=1e-4) and \
-        box["max_mm"] == pytest.approx([0, 150, 10], abs=1e-4), f"wrong box for the nested part: {box}"
+    assert box["min_mm"] == pytest.approx([-20, 110, 0], abs=1e-4) and box["max_mm"] == pytest.approx(
+        [0, 150, 10], abs=1e-4
+    ), f"wrong box for the nested part: {box}"
     assert measured["distance_mm"] == pytest.approx(10, abs=1e-4), measured
     assert measured["nearest_mm"] == pytest.approx([-10, 150, 5], abs=1e-4), measured
 
@@ -394,7 +394,9 @@ def test_an_assembly_left_editing_a_part_is_edited_as_a_whole_again(assembly, bl
     model = assembly._model
     title = model.GetTitle().rsplit(".", 1)[0]
     extension = binding.wrap(model.Extension, binding.module().IModelDocExtension)
-    assert extension.SelectByID2(f"{only(assembly, 'block_a')['name']}@{title}", "COMPONENT", 0, 0, 0, False, 0, None, 0)
+    assert extension.SelectByID2(
+        f"{only(assembly, 'block_a')['name']}@{title}", "COMPONENT", 0, 0, 0, False, 0, None, 0
+    )
     assert binding.wrap(model, binding.module().IAssemblyDoc).EditPart2(True, False, 0) == 0
     assert not model.IsEditingSelf(), "the setup did not leave the assembly editing a part"
 
@@ -447,18 +449,20 @@ def test_face_selector_reaches_the_cavity(part):
     # while '+z' (the face through the point) and '+z:inner' reach it and drill
     # through the 2 mm wall.
     import math
+
     part.add_box(*BLOCK_A)
     closed = part.add_shell(2, open_face="none")["mass_properties"]["volume_mm3"]
     with pytest.raises(SolidWorksError):
         part.add_hole_on_face(4, "+z:outer", 20, 10, 2)
     drilled = part.add_hole_on_face(4, "+z", 20, 10, 2)
-    assert closed - drilled["mass_properties"]["volume_mm3"] == pytest.approx(math.pi * 2 ** 2 * 2, abs=0.01)
+    assert closed - drilled["mass_properties"]["volume_mm3"] == pytest.approx(math.pi * 2**2 * 2, abs=0.01)
     inner = part.add_hole_on_face(4, "+z:inner", 10, 10, 2)
-    assert closed - inner["mass_properties"]["volume_mm3"] == pytest.approx(2 * math.pi * 2 ** 2 * 2, abs=0.01)
+    assert closed - inner["mass_properties"]["volume_mm3"] == pytest.approx(2 * math.pi * 2**2 * 2, abs=0.01)
 
 
-@pytest.mark.parametrize("axis,expected", [([[60, 0, 5], [0, 1, 0]], 20), ([[20, 10, 0], [0, 0, 1]], 0)],
-                         ids=["beside", "through"])
+@pytest.mark.parametrize(
+    "axis,expected", [([[60, 0, 5], [0, 1, 0]], 20), ([[20, 10, 0], [0, 0, 1]], 0)], ids=["beside", "through"]
+)
 def test_measure_distance_to_an_axis(assembly, blocks, axis, expected):
     # block_a spans x 0..40: a line along y at x = 60 runs 20 mm off; one along z
     # through its middle runs through it

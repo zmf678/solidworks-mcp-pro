@@ -16,6 +16,15 @@ env/
 # Generated output (exports, screenshots)
 out/
 
+# Engineering / test artifacts
+.tmp/
+.coverage
+coverage.xml
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+pytest-of-*/
+
 # OS / editor cruft
 Thumbs.db
 .DS_Store

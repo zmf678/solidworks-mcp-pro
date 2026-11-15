@@ -58,6 +58,7 @@ class SketchPlan:
     x_dims / y_dims: (point, coordinate) dimensioned from the origin.
     fixed: too many points to dimension; fix everything instead.
     """
+
     fixed: bool = False
     coincident: tuple = ()
     horizontal: tuple = ()
@@ -133,8 +134,9 @@ def plan_sketch(points_mm, segments) -> SketchPlan:
     alias = list(range(n))
     coincident = []
     for k in range(n):
-        twin = next((i for i in range(k) if alias[i] == i
-                     and _same(pts[i][0], pts[k][0]) and _same(pts[i][1], pts[k][1])), None)
+        twin = next(
+            (i for i in range(k) if alias[i] == i and _same(pts[i][0], pts[k][0]) and _same(pts[i][1], pts[k][1])), None
+        )
         if twin is not None:
             alias[k] = twin
             coincident.append((k, twin))
@@ -165,8 +167,9 @@ def plan_sketch(points_mm, segments) -> SketchPlan:
 
     origin_x, x_dims = anchor(xs, 0)
     origin_y, y_dims = anchor(ys, 1)
-    return SketchPlan(False, tuple(coincident), tuple(horizontal), tuple(vertical), at_origin,
-                      origin_x, origin_y, x_dims, y_dims)
+    return SketchPlan(
+        False, tuple(coincident), tuple(horizontal), tuple(vertical), at_origin, origin_x, origin_y, x_dims, y_dims
+    )
 
 
 def plan_profile(points_mm, closed: bool) -> SketchPlan:
@@ -264,10 +267,15 @@ class SketchDefiner:
         finally:
             self._resume(paused)
 
-    _CHAIN_RELATIONS = {"tangent": SW_CONSTRAINT_TANGENT, "collinear": SW_CONSTRAINT_COLINEAR,
-                        "horizontal": SW_CONSTRAINT_HORIZONTAL, "vertical": SW_CONSTRAINT_VERTICAL,
-                        "at_origin": SW_CONSTRAINT_COINCIDENT, "origin_x": SW_CONSTRAINT_VERTICAL_POINTS,
-                        "origin_y": SW_CONSTRAINT_HORIZONTAL_POINTS}
+    _CHAIN_RELATIONS = {
+        "tangent": SW_CONSTRAINT_TANGENT,
+        "collinear": SW_CONSTRAINT_COLINEAR,
+        "horizontal": SW_CONSTRAINT_HORIZONTAL,
+        "vertical": SW_CONSTRAINT_VERTICAL,
+        "at_origin": SW_CONSTRAINT_COINCIDENT,
+        "origin_x": SW_CONSTRAINT_VERTICAL_POINTS,
+        "origin_y": SW_CONSTRAINT_HORIZONTAL_POINTS,
+    }
 
     def define_chain(self, plan, segments, points) -> dict:
         """Carry out a free_sketch plan. segments: the drawn segments, one per
@@ -314,8 +322,10 @@ class SketchDefiner:
             for _ in plan.origin_y:
                 self._relate(SW_CONSTRAINT_HORIZONTAL_POINTS, "level-with-origin", point, self._origin)
             dims = {}
-            for axis, add, entries in (("x", self._model.AddHorizontalDimension2, plan.x_dims),
-                                       ("y", self._model.AddVerticalDimension2, plan.y_dims)):
+            for axis, add, entries in (
+                ("x", self._model.AddHorizontalDimension2, plan.x_dims),
+                ("y", self._model.AddVerticalDimension2, plan.y_dims),
+            ):
                 for i, value in entries:
                     role = names.get((axis, i), axis)
                     dims[role] = self._dimension(add, point, role, abs(value))
@@ -380,12 +390,16 @@ class SketchDefiner:
     def _dimension(self, add, point, role: str, value_mm=None, to=None) -> str:
         """Dimension a point from the origin, or from `to`; with value_mm, drive it to that value."""
         if not (point.Select4(False, None) and (to or self._origin).Select4(True, None)):
-            raise SolidWorksError(f"Could not select a sketch point and what to measure it from for dimension '{role}'.")
+            raise SolidWorksError(
+                f"Could not select a sketch point and what to measure it from for dimension '{role}'."
+            )
         display = add(point.X + _TEXT_OFFSET_M, point.Y + _TEXT_OFFSET_M, 0.0)
         if display is None:
             raise SolidWorksError(f"SolidWorks refused the dimension '{role}'.")
         if value_mm is not None:
-            dim = binding.wrap(binding.wrap(display, self._mod.IDisplayDimension).GetDimension2(0), self._mod.IDimension)
+            dim = binding.wrap(
+                binding.wrap(display, self._mod.IDisplayDimension).GetDimension2(0), self._mod.IDimension
+            )
             dim.SystemValue = mm_to_m(value_mm)
         return self._named(display, role)
 

@@ -33,8 +33,9 @@ def test_merge_false_keeps_a_body_of_its_own(part):
     assert vol(tab) == pytest.approx(BLOCK + TAB), "separate bodies count apart, overlap and all"
 
 
-@pytest.mark.parametrize("operation,expected", [("add", BLOCK + TAB - OVERLAP), ("subtract", BLOCK - OVERLAP),
-                                                ("common", OVERLAP)])
+@pytest.mark.parametrize(
+    "operation,expected", [("add", BLOCK + TAB - OVERLAP), ("subtract", BLOCK - OVERLAP), ("common", OVERLAP)]
+)
 def test_combine_bodies(part, operation, expected):
     _, tab = two_bodies(part)
     [main] = [b["name"] for b in part.list_bodies()["bodies"] if b["name"] != tab["body"]]

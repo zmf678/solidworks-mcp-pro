@@ -1,7 +1,15 @@
 # SolidWorks MCP
 
+> **Engineering-hardened fork.** This repository is a fork of
+> [`hjbaard/SolidWorks-MCP`](https://github.com/hjbaard/SolidWorks-MCP), focused on
+> modular architecture, reproducible development and CI. The modelling engine and
+> tool surface come from upstream; method bodies are unchanged. See
+> [`Docs/ENGINEERING.md`](Docs/ENGINEERING.md),
+> [`Docs/ARCHITECTURE.md`](Docs/ARCHITECTURE.md) and
+> [`UPSTREAM.md`](UPSTREAM.md).
+
 [![PyPI](https://img.shields.io/pypi/v/solidworks-mcp)](https://pypi.org/project/solidworks-mcp/)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](https://github.com/hjbaard/SolidWorks-MCP/blob/main/LICENSE)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](https://github.com/zmf678/solidworks-mcp-pro/blob/main/LICENSE)
 
 Let an AI agent (Claude, or any other MCP client) model real parametric parts and
 assemblies in **your own SolidWorks** — and **check its own work**. Every
@@ -12,13 +20,13 @@ it "looks about right".
 <!-- mcp-name: io.github.hjbaard/solidworks-mcp -->
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/hjbaard/SolidWorks-MCP/main/Docs/images/bracket.png" width="32%" alt="3D-print mounting bracket with counterbored holes, bolt circle and cable slot">
-  <img src="https://raw.githubusercontent.com/hjbaard/SolidWorks-MCP/main/Docs/images/thread.png" width="32%" alt="M10 bolt with a real, printable ISO metric thread">
-  <img src="https://raw.githubusercontent.com/hjbaard/SolidWorks-MCP/main/Docs/images/vase.png" width="32%" alt="Revolved and shelled vase">
+  <img src="Docs/images/bracket.png" width="32%" alt="3D-print mounting bracket with counterbored holes, bolt circle and cable slot">
+  <img src="Docs/images/thread.png" width="32%" alt="M10 bolt with a real, printable ISO metric thread">
+  <img src="Docs/images/vase.png" width="32%" alt="Revolved and shelled vase">
 </p>
 <p align="center">
-  <img src="https://raw.githubusercontent.com/hjbaard/SolidWorks-MCP/main/Docs/images/pipe.png" width="32%" alt="Swept pipe with rounded bends">
-  <img src="https://raw.githubusercontent.com/hjbaard/SolidWorks-MCP/main/Docs/images/loft.png" width="32%" alt="Lofted and shelled horn">
+  <img src="Docs/images/pipe.png" width="32%" alt="Swept pipe with rounded bends">
+  <img src="Docs/images/loft.png" width="32%" alt="Lofted and shelled horn">
 </p>
 <p align="center"><sub>Built by the tools themselves: a mounting bracket (every step checked against a hand calculation), an M10 bolt with a real thread, a revolved + shelled vase, a swept pipe, a lofted + shelled horn.</sub></p>
 
@@ -136,11 +144,10 @@ may still change. See [CHANGELOG.md](https://github.com/hjbaard/SolidWorks-MCP/b
 
 ## Development
 
-Clone the repository, then install it editable into a venv:
+Clone the repository, then create the pinned environment:
 
 ```powershell
-python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -e .[dev]
+uv sync --extra dev
 ```
 
 To run the MCP server from this checkout instead of via uvx, point your client
@@ -150,7 +157,7 @@ at the venv's Python:
 {
   "mcpServers": {
     "solidworks": {
-      "command": "C:\\path\\to\\SolidWorks-MCP\\.venv\\Scripts\\python.exe",
+      "command": "C:\\path\\to\\solidworks-mcp-pro\\.venv\\Scripts\\python.exe",
       "args": ["-m", "solidworks_mcp.server"]
     }
   }
@@ -162,21 +169,25 @@ at the venv's Python:
 With SolidWorks open:
 
 ```powershell
-.\.venv\Scripts\python.exe scripts\probe_connection.py     # M0
-.\.venv\Scripts\python.exe scripts\m1_block.py             # M1
-.\.venv\Scripts\python.exe scripts\m2_parametric.py        # M2
-.\.venv\Scripts\python.exe scripts\test_mcp_server.py      # M3 (full MCP loop over stdio)
-.\.venv\Scripts\python.exe scripts\m5_demo_bracket.py      # M5 (3D-print bracket, every step verified)
+uv run python scripts\probe_connection.py     # M0
+uv run python scripts\m1_block.py             # M1
+uv run python scripts\m2_parametric.py        # M2
+uv run python scripts\test_mcp_server.py      # M3 (full MCP loop over stdio)
+uv run python scripts\m5_demo_bracket.py      # M5 (3D-print bracket, every step verified)
 ```
 
 `scripts/introspect_api.py` regenerates/inspects the installed typelib and prints
 verified enum values — run it if SolidWorks is upgraded and signatures change.
 
-### Tests
+### Tests and checks
 
 ```powershell
-.\.venv\Scripts\python.exe -m pytest                 # all tests
-.\.venv\Scripts\python.exe -m pytest -m "not solidworks"   # fast unit layer, no SolidWorks
+uv run pytest -m "not solidworks"          # fast unit layer, no SolidWorks
+uv run pytest                              # all tests, needs a running SolidWorks
+uv run pytest -m solidworks                # integration layer only
+uv run ruff check src tests                # lint
+uv run ruff format --check src tests       # formatting
+uv run mypy                                # core-module type check
 ```
 
 Two layers: **pure unit tests** (units, selector/direction parsing, polygon
@@ -185,6 +196,10 @@ arguments to the right session method) run anywhere; **integration tests**
 (`solidworks` marker) drive a running SolidWorks and verify each feature's
 volume — or each component's placement — against a hand calc. They auto-skip if
 SolidWorks isn't reachable.
+
+The engineering rules, definition of done and module boundaries are in
+[`Docs/ENGINEERING.md`](Docs/ENGINEERING.md). The request flow and mixin map are
+in [`Docs/ARCHITECTURE.md`](Docs/ARCHITECTURE.md).
 
 ## Tools
 
@@ -293,14 +308,56 @@ SolidWorks-internal metre/radian units at the boundary.
 
 ```
 src/solidworks_mcp/
-  binding.py     early-binding plumbing (wrap raw dispatches in generated classes)
-  com_worker.py  one dedicated STA thread; all COM calls serialised through it
-  session.py     SolidWorks operations (must run on the COM thread)
-  server.py      FastMCP tools that delegate to session via the worker
-  constants.py   enum values read from the installed typelib (verified)
-  units.py       mm<->m, deg<->rad
-  errors.py      SolidWorksError -> agent-facing {ok:false,error}
+  server.py         CLI entry point and public re-exports
+  app.py            FastMCP instance, connect-time instructions, guide, dispatch
+  tools/            MCP tool declarations by domain (88 tools)
+    core.py         lifecycle and connection
+    solids.py       extrusion, revolve, sweep, loft, planes, ribs
+    features.py     holes, threads, face features, cuts, fillets, patterns, shells
+    sketch.py       sketch reading and person-authored sketches
+    inspection.py   dimensions, equations, history, materials, bodies, printability
+    io.py           documents, export, screenshots, drawings
+    assembly.py     assemblies, components, mates, interference, motion
+  com_worker.py     one dedicated STA thread; all COM calls serialised through it
+  binding.py        early-binding plumbing (wrap raw dispatches in generated classes)
+  constants.py      enum values read from the installed typelib (verified)
+  units.py          mm<->m, deg<->rad
+  errors.py         SolidWorksError -> agent-facing {ok:false,error}
+  mesh_tools.py     pure STL/3MF sectioning helpers
+  region_tools.py   pure swept-region helpers
+  sketch_constraints.py  pure sketch DoF planner
+  session/
+    __init__.py     composes SolidWorksSession from the domain mixins
+    core.py         connection, documents, guarded calls, COM-thread helpers
+    geometry.py     default planes, face/edge selection, extrude helper
+    sketching.py    sketch drawing and polygon/constraint helpers
+    solids.py       box, profile, spline, disc, cylinder, cone, revolve
+    sweeps.py       sweeps, lofts and ribs
+    holes.py        holes, counterbores, threads, Hole Wizard
+    face_features.py features on planar faces (holes, bosses, pads, text)
+    cuts.py         profile cuts, pockets, slots
+    fillets.py      fillets, variable fillets, full rounds
+    chamfers_shells.py chamfers and shells
+    mirrors.py      body and feature mirrors
+    patterns_planes.py linear/circular patterns and reference planes
+    parameters.py   dimensions, equations and dimension listings
+    feature_history.py feature tree, suppression, reordering
+    person_sketch.py reading and building on person-authored sketches
+    materials.py    appearance and material assignment
+    inspection.py   mass properties, faces, edges, bodies
+    printability.py overhang, island and thin-wall analysis
+    mesh_io.py      mesh sectioning/comparison
+    export_io.py    export, screenshots, drawings
+    assembly_core.py assembly documents, components, transforms
+    assembly_mates.py mates and mate measurement
+    assembly_analysis.py interference, distance, motion, swept regions
 ```
+
+The 6,646-line upstream `session.py` was split into 23 domain mixins; the public
+`SolidWorksSession` class and all 88 tool names are unchanged. The flat
+`server.py` tool list was split into seven domain modules under `tools/`. See
+[`Docs/ARCHITECTURE.md`](Docs/ARCHITECTURE.md) for the request flow and the
+extension guide.
 
 Two non-obvious design decisions, both load-bearing:
 
@@ -327,10 +384,10 @@ Proven end-to-end against **SOLIDWORKS 2026 (3DEXPERIENCE R2026x)**:
 | M2 | change a named dimension → rebuild → volume changes predictably | ✅ |
 | M3 | full agent loop via the MCP server: build → measure → correct → export STEP/STL + screenshot | ✅ |
 | M4 | revolve, sweep, loft, profiles, holes/pockets/counterbores, slots, fillet/chamfer, shell, patterns, equations, materials, save/open | 🚧 ongoing |
-| M5 | end-to-end 3D-print part: build a functional mounting bracket through the full loop → verify every dimension → export a fine STL ([scripts/m5_demo_bracket.py](https://github.com/hjbaard/SolidWorks-MCP/blob/main/scripts/m5_demo_bracket.py)) | ✅ |
-| M6 | assemblies: insert and position components, mate them, check interference — every placement and mate measured back ([tests/test_assembly.py](https://github.com/hjbaard/SolidWorks-MCP/blob/main/tests/test_assembly.py)) | ✅ |
+| M5 | end-to-end 3D-print part: build a functional mounting bracket through the full loop → verify every dimension → export a fine STL ([scripts/m5_demo_bracket.py](scripts/m5_demo_bracket.py)) | ✅ |
+| M6 | assemblies: insert and position components, mate them, check interference — every placement and mate measured back ([tests/test_assembly.py](tests/test_assembly.py)) | ✅ |
 
-See [Docs/PROGRESS.md](https://github.com/hjbaard/SolidWorks-MCP/blob/main/Docs/PROGRESS.md) for the detailed log and roadmap.
+See [Docs/PROGRESS.md](Docs/PROGRESS.md) for the detailed log and roadmap.
 Feedback and contributions are welcome.
 
 ## Known limitations

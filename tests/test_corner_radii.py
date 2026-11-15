@@ -73,8 +73,9 @@ def test_a_rounded_pocket(part):
 
 def test_a_rounded_pad_on_a_face(part):
     part.add_box(40, 20, 10)
-    pad = part.add_extruded_profile_on_face([[5, 5, 10], [35, 5, 10], [35, 15, 10], [5, 15, 10]], "+z", 2,
-                                            corner_radii_mm=3)
+    pad = part.add_extruded_profile_on_face(
+        [[5, 5, 10], [35, 5, 10], [35, 15, 10], [5, 15, 10]], "+z", 2, corner_radii_mm=3
+    )
 
     assert abs(vol(pad) - (8000 + (30 * 10 - 4 * corner(3)) * 2)) < 0.01
     assert pad["fully_defined"] and "radius" in pad["dimensions"]
@@ -82,8 +83,7 @@ def test_a_rounded_pad_on_a_face(part):
 
 def test_a_rounded_window_through_a_plane(part):
     part.add_box(40, 20, 10)
-    window = part.cut_profile_through_plane([[0, 5, 2], [0, 15, 2], [0, 15, 8], [0, 5, 8]], "right",
-                                            corner_radii_mm=2)
+    window = part.cut_profile_through_plane([[0, 5, 2], [0, 15, 2], [0, 15, 8], [0, 5, 8]], "right", corner_radii_mm=2)
 
     # SolidWorks measures this through-all cut 0.0007 mm^2 per mm of depth short
     # (+0.027 here), although its sketch is exact: radius 2.0000000, the corners
@@ -124,7 +124,8 @@ def test_a_radius_too_big_fails_before_anything_is_sketched(part):
     history = part.list_features()["features"]
 
     with pytest.raises(SolidWorksError, match="Edge 1-2 is 10 mm long"):
-        part.add_extruded_profile_on_face([[5, 5, 10], [35, 5, 10], [35, 15, 10], [5, 15, 10]], "+z", 2,
-                                          corner_radii_mm=5)
+        part.add_extruded_profile_on_face(
+            [[5, 5, 10], [35, 5, 10], [35, 15, 10], [5, 15, 10]], "+z", 2, corner_radii_mm=5
+        )
 
     assert part.list_features()["features"] == history, "the refused profile left a sketch behind"

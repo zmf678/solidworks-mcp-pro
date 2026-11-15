@@ -19,8 +19,11 @@ def vol(result):
 
 def letter_tops(session, z_mm):
     """The flat tops of embossed letters: faces facing +z at height z_mm."""
-    return [f for f in session.list_faces()["faces"]
-            if f.get("normal") == [0, 0, 1] and abs(f["center_mm"][2] - z_mm) < 1e-6]
+    return [
+        f
+        for f in session.list_faces()["faces"]
+        if f.get("normal") == [0, 0, 1] and abs(f["center_mm"][2] - z_mm) < 1e-6
+    ]
 
 
 def test_text_needs_letters_and_a_size():
@@ -46,7 +49,9 @@ def test_engraved_and_embossed_text_cut_and_add_the_same_letters(part):
 
     assert abs(embossed["text_area_mm2"] - area) < 0.01, "engraving and embossing the same text gave different letters"
     assert abs(vol(embossed) - (BLOCK + area * 1)) < 0.01
-    assert embossed["mass_properties"]["bounding_box_mm"]["max_mm"][2] == pytest.approx(11), "the letters must stand 1 mm"
+    assert embossed["mass_properties"]["bounding_box_mm"]["max_mm"][2] == pytest.approx(11), (
+        "the letters must stand 1 mm"
+    )
 
 
 @pytest.mark.solidworks

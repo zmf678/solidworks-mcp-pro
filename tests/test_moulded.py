@@ -22,13 +22,16 @@ def vol(result):
 
 
 def taken_off(length, r1, r2):
-    return (1 - math.pi / 4) * length * (r1 ** 2 + r1 * r2 + r2 ** 2) / 3
+    return (1 - math.pi / 4) * length * (r1**2 + r1 * r2 + r2**2) / 3
 
 
 def edge_between(part, a, b):
     """The list_edges index of the edge from a to b, either way round."""
-    [index] = [e["index"] for e in part.list_edges()["edges"]
-               if sorted(map(tuple, e.get("ends_mm", []))) == sorted([tuple(a), tuple(b)])]
+    [index] = [
+        e["index"]
+        for e in part.list_edges()["edges"]
+        if sorted(map(tuple, e.get("ends_mm", []))) == sorted([tuple(a), tuple(b)])
+    ]
     return str(index)
 
 
@@ -40,13 +43,15 @@ def test_a_variable_fillet_grows_along_its_edge(part):
     """The top front edge of the block: R2 at x = 0, growing to R5 at x = 40."""
     part.add_box(40, 20, 10)
     fillet = part.add_fillet(2, edge_between(part, [0, 0, 10], [40, 0, 10]), radii_at_mm=[[40, 0, 10, 5]])
-    assert vol(fillet) == pytest.approx(BLOCK - taken_off(40, 2, 5), rel=1e-5), \
+    assert vol(fillet) == pytest.approx(BLOCK - taken_off(40, 2, 5), rel=1e-5), (
         "the radius should run linearly from 2 at one end to 5 at the other"
+    )
     ends = {tuple(v["at_mm"]): v for v in fillet["vertex_radii"]}
     assert ends[(0, 0, 10)]["radius_mm"] == 2 and ends[(40, 0, 10)]["radius_mm"] == 5
     wider = part.set_dimension(ends[(0, 0, 10)]["dimension"], 3)
-    assert vol(wider) == pytest.approx(BLOCK - taken_off(40, 3, 5), rel=1e-5), \
+    assert vol(wider) == pytest.approx(BLOCK - taken_off(40, 3, 5), rel=1e-5), (
         "each end's radius is a dimension of its own: the x = 0 end should now be R3"
+    )
 
 
 def test_a_variable_fillet_over_two_edges_puts_each_radius_at_its_corner(part):
@@ -82,10 +87,10 @@ def test_a_full_round_rounds_a_rib_off(part):
     rib_on_plate(part)
     rounded = part.add_full_round("+z", 20, 20, 25)
     assert rounded["width_mm"] == pytest.approx(10)
-    assert vol(rounded) == pytest.approx(40 * 40 * 5 + 10 * 40 * 20 - 40 * (10 * 5 - math.pi * 5 ** 2 / 2),
-                                         rel=1e-9)
-    assert rounded["mass_properties"]["bounding_box_mm"]["max_mm"][2] == pytest.approx(25), \
+    assert vol(rounded) == pytest.approx(40 * 40 * 5 + 10 * 40 * 20 - 40 * (10 * 5 - math.pi * 5**2 / 2), rel=1e-9)
+    assert rounded["mass_properties"]["bounding_box_mm"]["max_mm"][2] == pytest.approx(25), (
         "the crown of the round stays at the rib's top"
+    )
 
 
 def test_a_full_round_needs_one_narrowest_pair_of_sides(part):

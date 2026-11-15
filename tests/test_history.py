@@ -15,8 +15,8 @@ from solidworks_mcp.errors import SolidWorksError
 pytestmark = pytest.mark.solidworks
 
 BLOCK = 40 * 20 * 10
-HOLE = math.pi * 3 ** 2 * 10                  # Ø6 through the 10 mm block
-ROUNDS = 4 * (1 - math.pi / 4) * 2 ** 2 * 10  # R2 on the four vertical edges
+HOLE = math.pi * 3**2 * 10  # Ø6 through the 10 mm block
+ROUNDS = 4 * (1 - math.pi / 4) * 2**2 * 10  # R2 on the four vertical edges
 
 
 def vol(result):
@@ -87,8 +87,13 @@ def test_list_features_gives_the_history_in_tree_order(part):
     listed = part.list_features()
 
     history = [(f["name"], f["type"]) for f in listed["features"]]
-    assert history == [(box_sketch, "ProfileFeature"), ("Base", "Extrusion"),
-                       (hole_sketch, "ProfileFeature"), ("Hole", "ICE"), ("Round", "Fillet")], (
+    assert history == [
+        (box_sketch, "ProfileFeature"),
+        ("Base", "Extrusion"),
+        (hole_sketch, "ProfileFeature"),
+        ("Hole", "ICE"),
+        ("Round", "Fillet"),
+    ], (
         "list_features must give what was modelled, in tree order, without SolidWorks' folders, "
         f"default planes and origin; got {history}"
     )

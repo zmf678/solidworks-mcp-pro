@@ -18,9 +18,16 @@ from solidworks_mcp.sketch_constraints import MAX_DIMENSIONED_VERTICES, plan_pro
 
 def constraint_count(plan):
     """Degrees of freedom the plan removes; must equal 2 per vertex."""
-    return (2 * len(plan.coincident) + len(plan.horizontal) + len(plan.vertical)
-            + (2 if plan.at_origin is not None else 0)
-            + len(plan.origin_x) + len(plan.origin_y) + len(plan.x_dims) + len(plan.y_dims))
+    return (
+        2 * len(plan.coincident)
+        + len(plan.horizontal)
+        + len(plan.vertical)
+        + (2 if plan.at_origin is not None else 0)
+        + len(plan.origin_x)
+        + len(plan.origin_y)
+        + len(plan.x_dims)
+        + len(plan.y_dims)
+    )
 
 
 def test_rectangle_at_origin_gets_width_and_height_only():

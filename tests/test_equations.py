@@ -20,7 +20,7 @@ def by_name(part):
 
 
 def test_an_equation_with_the_same_name_is_replaced(part):
-    """"L" = 85 drives the depth; setting "L" again changes it, in place."""
+    """ "L" = 85 drives the depth; setting "L" again changes it, in place."""
     block = part.add_box(40, 20, 10)
     first = part.set_equation('"L" = 85')
     part.set_equation(f'"{block["dimensions"]["depth"]}" = "L" / 5')
@@ -93,7 +93,7 @@ def test_a_refused_equation_leaves_the_others_as_they_were(part):
 def test_an_equation_that_breaks_a_feature_names_it(part):
     """R25 on the vertical edges of a 40 x 20 x 10 block fails to rebuild
     (SolidWorks still builds overlapping fillets up to R15 there, measured)."""
-    block = part.add_box(40, 20, 10)
+    part.add_box(40, 20, 10)
     part.add_fillet(2, "z", name="Round")
     [radius] = [d["name"] for d in part.list_dimensions()["dimensions"] if d["feature"] == "Round"]
     part.set_equations(['"R" = 2', f'"{radius}" = "R"'])

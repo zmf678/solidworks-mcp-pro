@@ -44,7 +44,7 @@ class ComWorker:
 
     def __init__(self, call_timeout_s: float = DEFAULT_CALL_TIMEOUT_S) -> None:
         self._call_timeout_s = call_timeout_s
-        self._queue: "queue.Queue" = queue.Queue()
+        self._queue: queue.Queue = queue.Queue()
         self._ready = threading.Event()
         self._shutting_down = False
         self._thread = threading.Thread(target=self._run, name="solidworks-com", daemon=True)
@@ -72,7 +72,7 @@ class ComWorker:
     def submit(self, fn) -> "concurrent.futures.Future":
         if self._shutting_down:
             raise SolidWorksError("The COM worker is shut down; no new operations are possible.")
-        fut: "concurrent.futures.Future" = concurrent.futures.Future()
+        fut: concurrent.futures.Future = concurrent.futures.Future()
         self._queue.put((fn, fut))
         return fut
 
@@ -86,7 +86,7 @@ class ComWorker:
         fut = self.submit(fn)
         try:
             return await asyncio.wait_for(asyncio.wrap_future(fut), self._call_timeout_s)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             raise SolidWorksError(
                 f"SolidWorks did not respond within {self._call_timeout_s:.0f}s. "
                 "A modal dialog is probably open in SolidWorks. "

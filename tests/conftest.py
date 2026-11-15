@@ -65,8 +65,8 @@ def part(sw):
 
 # --- assemblies ---------------------------------------------------------------
 
-BLOCK_A = (40.0, 20.0, 10.0)   # saved as block_a.sldprt
-BLOCK_B = (20.0, 20.0, 20.0)   # saved as block_b.sldprt
+BLOCK_A = (40.0, 20.0, 10.0)  # saved as block_a.sldprt
+BLOCK_B = (20.0, 20.0, 20.0)  # saved as block_b.sldprt
 
 
 @pytest.fixture(scope="session")

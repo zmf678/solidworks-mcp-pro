@@ -45,7 +45,7 @@ SW_FILLET_TYPE_FULL_ROUND = 3
 # array and returns None. Tangent propagation is intentionally NOT enabled, so
 # the explicit edge selection equals exactly what gets filleted.
 SW_FILLET_OPT_UNIFORM_RADIUS = 2
-SW_FILLET_OPT_PROPAGATE = 1        # swFeatureFilletPropagate: on along edges that run on tangentially
+SW_FILLET_OPT_PROPAGATE = 1  # swFeatureFilletPropagate: on along edges that run on tangentially
 # swFeatureFilletVarRadiusType: a variable radius runs straight from end to end
 # (without it, along a smooth curve that misses the hand calculation)
 SW_FILLET_OPT_STRAIGHT_TRANSITION = 4
@@ -62,8 +62,8 @@ SW_CHAMFER_ANGLE_DISTANCE = 1
 SW_FEATURE_CHAMFER_FLIP = 1
 
 # swSketchSlotCreationType_e / swSketchSlotLengthType_e
-SW_SLOT_CREATION_LINE = 0       # straight slot
-SW_SLOT_LENGTH_CENTER = 0       # length is centre-to-centre of the end arcs
+SW_SLOT_CREATION_LINE = 0  # straight slot
+SW_SLOT_LENGTH_CENTER = 0  # length is centre-to-centre of the end arcs
 
 # swRefPlaneReferenceConstraints_e -- offset a new plane a fixed distance from a
 # selected reference plane (for lofts: one parallel plane per profile); with
@@ -85,39 +85,39 @@ SW_FEATURE_SCOPE_ALL_BODIES = 0
 # SolidWorks' own modelled thread: IFeatureManager.CreateDefinition(swFmSweepThread)
 # gives an IThreadFeatureData. The profile libraries (File Locations > Thread
 # Profiles) hold one configuration per valid size, e.g. 'M10x1.5'.
-SW_FM_SWEEP_THREAD = 87          # swFeatureNameID_e
-SW_THREAD_METHOD_CUT = 0         # swThreadMethod_e
-SW_THREAD_END_BLIND = 0          # swThreadEndCondition_e
+SW_FM_SWEEP_THREAD = 87  # swFeatureNameID_e
+SW_THREAD_METHOD_CUT = 0  # swThreadMethod_e
+SW_THREAD_END_BLIND = 0  # swThreadEndCondition_e
 THREAD_PROFILE_EXTERNAL = "Metric Die"
 THREAD_PROFILE_INTERNAL = "Metric Tap"
 
 # Hole Wizard (IFeatureManager.HoleWizard5): SolidWorks' own standard tables.
-SW_WZD_COUNTERBORE = 0             # swWzdGeneralHoleTypes_e
+SW_WZD_COUNTERBORE = 0  # swWzdGeneralHoleTypes_e
 SW_WZD_COUNTERSINK = 1
 SW_WZD_HOLE = 2
 SW_WZD_TAP = 4
-SW_WZD_STANDARD_ISO = 8            # swWzdHoleStandards_e
-SW_ISO_SOCKET_HEAD_CAP = 139       # swWzdHoleStandardFastenerTypes_e (ISO 4762)
-SW_ISO_SOCKET_COUNTERSUNK = 140    # ISO 10642
-SW_ISO_SCREW_CLEARANCES = 144      # ISO 273
+SW_WZD_STANDARD_ISO = 8  # swWzdHoleStandards_e
+SW_ISO_SOCKET_HEAD_CAP = 139  # swWzdHoleStandardFastenerTypes_e (ISO 4762)
+SW_ISO_SOCKET_COUNTERSUNK = 140  # ISO 10642
+SW_ISO_SCREW_CLEARANCES = 144  # ISO 273
 SW_ISO_TAPPED_HOLE = 147
 SW_COSMETIC_THREAD_WITH_CALLOUT = 1  # swWzdHoleCosmeticThreadTypes_e
 SCREW_FITS = {"close": 0, "normal": 1, "loose": 2}  # swWzdHoleScrewClearanceTypes_e
-SW_SEL_FACES = 2                   # swSelectType_e, for IModelDocExtension.SelectByRay
-SW_SEL_SKETCH_POINTS = 11          # swSelectType_e: a sketch point a dimension is attached to
-SW_SEL_EXT_SKETCH_POINTS = 25      # swSelectType_e: an external one, such as the origin's
-SW_HOR_LINEAR_DIMENSION = 11       # swDimensionType_e of a display dimension
+SW_SEL_FACES = 2  # swSelectType_e, for IModelDocExtension.SelectByRay
+SW_SEL_SKETCH_POINTS = 11  # swSelectType_e: a sketch point a dimension is attached to
+SW_SEL_EXT_SKETCH_POINTS = 25  # swSelectType_e: an external one, such as the origin's
+SW_HOR_LINEAR_DIMENSION = 11  # swDimensionType_e of a display dimension
 SW_VERT_LINEAR_DIMENSION = 12
 
 # STL/3MF tessellation, set as ISldWorks user preferences BEFORE SaveAs3 (the mesh
 # translator reads them at save time). These are GLOBAL/application prefs, so the
 # caller must save and restore them around the export.
-SW_STL_QUALITY = 78            # swUserPreferenceIntegerValue_e (swSTLQuality)
-SW_STL_QUALITY_COARSE = 1      # swSTLQuality_e
+SW_STL_QUALITY = 78  # swUserPreferenceIntegerValue_e (swSTLQuality)
+SW_STL_QUALITY_COARSE = 1  # swSTLQuality_e
 SW_STL_QUALITY_FINE = 2
-SW_STL_QUALITY_CUSTOM = 3      # enables swSTLDeviation + swSTLAngleTolerance
-SW_STL_DEVIATION = 2           # swUserPreferenceDoubleValue_e -- chord tolerance (METRES)
-SW_STL_ANGLE_TOLERANCE = 3     # swUserPreferenceDoubleValue_e -- angular tolerance (RADIANS)
+SW_STL_QUALITY_CUSTOM = 3  # enables swSTLDeviation + swSTLAngleTolerance
+SW_STL_DEVIATION = 2  # swUserPreferenceDoubleValue_e -- chord tolerance (METRES)
+SW_STL_ANGLE_TOLERANCE = 3  # swUserPreferenceDoubleValue_e -- angular tolerance (RADIANS)
 
 # swStartConditions_e
 SW_START_SKETCH_PLANE = 0
@@ -126,7 +126,7 @@ SW_START_SKETCH_PLANE = 0
 SW_PREF_DEFAULT_TEMPLATE_PART = 8
 SW_PREF_DEFAULT_TEMPLATE_ASSEMBLY = 9
 SW_PREF_DEFAULT_TEMPLATE_DRAWING = 10
-SW_FILE_LOCATIONS_MATERIALS = 28   # swFileLocationsMaterialDatabases: the folders SolidWorks reads .sldmat from
+SW_FILE_LOCATIONS_MATERIALS = 28  # swFileLocationsMaterialDatabases: the folders SolidWorks reads .sldmat from
 MCP_MATERIAL_DATABASE = "solidworks-mcp"  # where set_material(density_kg_m3=...) materials come from
 
 # A document's length unit (IModelDocExtension.GetUserPreferenceInteger with
@@ -134,9 +134,19 @@ MCP_MATERIAL_DATABASE = "solidworks-mcp"  # where set_material(density_kg_m3=...
 # in SI, but equations are typed in these units. Names per swLengthUnit_e.
 SW_UNITS_LINEAR = 47
 SW_DETAILING_NO_OPTION = 0
-LENGTH_UNITS = {0: "millimetres", 1: "centimetres", 2: "metres", 3: "inches", 4: "feet",
-                5: "feet and inches", 6: "angstroms", 7: "nanometres", 8: "microns", 9: "mils",
-                10: "microinches"}
+LENGTH_UNITS = {
+    0: "millimetres",
+    1: "centimetres",
+    2: "metres",
+    3: "inches",
+    4: "feet",
+    5: "feet and inches",
+    6: "angstroms",
+    7: "nanometres",
+    8: "microns",
+    9: "mils",
+    10: "microinches",
+}
 
 # swConstraintType_e -- relation types for ISketchRelationManager.AddRelation,
 # which (unlike the string-keyed SketchAddConstraints) returns the relation, so a
@@ -145,12 +155,12 @@ SW_CONSTRAINT_HORIZONTAL = 4
 SW_CONSTRAINT_VERTICAL = 5
 SW_CONSTRAINT_COINCIDENT = 9
 SW_CONSTRAINT_FIXED = 17
-SW_CONSTRAINT_HORIZONTAL_POINTS = 25   # two points on one horizontal line
-SW_CONSTRAINT_VERTICAL_POINTS = 26     # two points on one vertical line
-SW_CONSTRAINT_RADIUS = 3               # the relation behind a radius dimension
+SW_CONSTRAINT_HORIZONTAL_POINTS = 25  # two points on one horizontal line
+SW_CONSTRAINT_VERTICAL_POINTS = 26  # two points on one vertical line
+SW_CONSTRAINT_RADIUS = 3  # the relation behind a radius dimension
 SW_CONSTRAINT_TANGENT = 6
 SW_CONSTRAINT_COLINEAR = 27
-SW_RELATIONS_ALL = 0                   # swSketchRelationFilterType_e, for GetRelations
+SW_RELATIONS_ALL = 0  # swSketchRelationFilterType_e, for GetRelations
 
 # swTextJustification_e (IModelDoc2.InsertSketchText): the point is the text's
 # lower-left corner and the text runs right from it.
@@ -163,12 +173,19 @@ SW_CONSTRAINED_CORNER_KEEP = 1
 # swConstrainedStatus_e (ISketch.GetConstrainedStatus), in the words SolidWorks
 # uses in its status bar
 SW_FULLY_CONSTRAINED = 3
-SKETCH_STATUSES = {1: "status unknown", 2: "under defined", 3: "fully defined", 4: "over defined",
-                   5: "no solution", 6: "invalid solution", 7: "autosolve off"}
+SKETCH_STATUSES = {
+    1: "status unknown",
+    2: "under defined",
+    3: "fully defined",
+    4: "over defined",
+    5: "no solution",
+    6: "invalid solution",
+    7: "autosolve off",
+}
 
 # swDeleteSelectionOptions_e (IModelDocExtension.DeleteSelection2, a bitmask)
 SW_DELETE_CHILDREN = 1
-SW_DELETE_ABSORBED = 2   # the sketches the feature consumed go with it
+SW_DELETE_ABSORBED = 2  # the sketches the feature consumed go with it
 
 # swMoveLocation_e (IModelDocExtension.ReorderFeature): the feature lands before the
 # location feature, with the sketch it absorbed
@@ -202,12 +219,12 @@ SW_ADD_COMPONENT_CURRENT_CONFIG = 0
 # swMateType_e. Concentric takes two cylindrical faces (picked by list_faces
 # index), the others two planar faces.
 MATE_TYPES = {
-    "coincident": 0,     # swMateCOINCIDENT
-    "concentric": 1,     # swMateCONCENTRIC
+    "coincident": 0,  # swMateCOINCIDENT
+    "concentric": 1,  # swMateCONCENTRIC
     "perpendicular": 2,  # swMatePERPENDICULAR
-    "parallel": 3,       # swMatePARALLEL
-    "distance": 5,       # swMateDISTANCE
-    "angle": 6,          # swMateANGLE
+    "parallel": 3,  # swMatePARALLEL
+    "distance": 5,  # swMateDISTANCE
+    "angle": 6,  # swMateANGLE
 }
 
 # swMateAlign_e -- CLOSEST lets SolidWorks keep the solution nearest the current
@@ -226,9 +243,9 @@ SW_COMPONENT_LIGHTWEIGHT_STATES = {1, 4}
 # swUserPreferenceToggle_e
 SW_TOGGLE_INPUT_DIM_VAL_ON_CREATE = 10
 SW_TOGGLE_STL_DONT_TRANSLATE = 71  # keep STL output in model coordinates (default: moved to positive space)
-SW_TOGGLE_STL_ONE_FILE = 72        # swSTLComponentsIntoOneFile: an assembly's STL as one file, not one per part
-SW_TOGGLE_DISPLAY_AXES = 4         # swDisplayAxes: a document's View > Axes
-SW_TOGGLE_DISPLAY_PLANES = 5       # swDisplayPlanes: a document's View > Planes
+SW_TOGGLE_STL_ONE_FILE = 72  # swSTLComponentsIntoOneFile: an assembly's STL as one file, not one per part
+SW_TOGGLE_DISPLAY_AXES = 4  # swDisplayAxes: a document's View > Axes
+SW_TOGGLE_DISPLAY_PLANES = 5  # swDisplayPlanes: a document's View > Planes
 # swMultiCAD_Enable3DInterconnect: with it on, an imported assembly arrives as ONE
 # wrapped sub-assembly, so its parts cannot be listed or mated (verified)
 SW_TOGGLE_3D_INTERCONNECT = 691

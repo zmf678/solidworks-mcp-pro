@@ -36,6 +36,7 @@ class Chain:
     counterclockwise, -1 = clockwise, or ("spline", [point, ...]). smooth:
     (entity, next entity, point) where two segments meet tangentially.
     """
+
     points: list
     entities: list
     user_points: list
@@ -79,8 +80,10 @@ def _direction(points, entity, at: int, centre=None):
 def _circumcentre(a, b, c):
     d = 2 * (a[0] * (b[1] - c[1]) + b[0] * (c[1] - a[1]) + c[0] * (a[1] - b[1]))
     sa, sb, sc = a[0] ** 2 + a[1] ** 2, b[0] ** 2 + b[1] ** 2, c[0] ** 2 + c[1] ** 2
-    return ((sa * (b[1] - c[1]) + sb * (c[1] - a[1]) + sc * (a[1] - b[1])) / d,
-            (sa * (c[0] - b[0]) + sb * (a[0] - c[0]) + sc * (b[0] - a[0])) / d)
+    return (
+        (sa * (b[1] - c[1]) + sb * (c[1] - a[1]) + sc * (a[1] - b[1])) / d,
+        (sa * (c[0] - b[0]) + sb * (a[0] - c[0]) + sc * (b[0] - a[0])) / d,
+    )
 
 
 def build_chain(start_mm, segments) -> Chain:
@@ -145,8 +148,10 @@ def build_chain(start_mm, segments) -> Chain:
                 offset = _cross(incoming, (end[0] - here[0], end[1] - here[1]))
                 along = incoming[0] * (end[0] - here[0]) + incoming[1] * (end[1] - here[1])
                 if abs(offset) > TANGENT_MM or along <= 0:
-                    raise SolidWorksError(f"Segment {k}'s line to {_fmt(end)} does not continue the segment before "
-                                          f"tangentially: from {_fmt(here)} it must run along {_fmt(incoming)}.")
+                    raise SolidWorksError(
+                        f"Segment {k}'s line to {_fmt(end)} does not continue the segment before "
+                        f"tangentially: from {_fmt(here)} it must run along {_fmt(incoming)}."
+                    )
                 end = (here[0] + along * incoming[0], here[1] + along * incoming[1])
             index = add_point(end, last)
             entities.append(("line", current, index))
@@ -165,24 +170,30 @@ def build_chain(start_mm, segments) -> Chain:
                 centre = _point(segment["center"], f"Segment {k}'s center")
                 radius, reach = math.dist(here, centre), math.dist(end, centre)
                 if abs(reach - radius) > TANGENT_MM or radius <= MERGE_MM:
-                    raise SolidWorksError(f"Segment {k}: {_fmt(here)} and {_fmt(end)} are not on one circle round "
-                                          f"{_fmt(centre)}: they lie {radius:g} and {reach:g} from it.")
+                    raise SolidWorksError(
+                        f"Segment {k}: {_fmt(here)} and {_fmt(end)} are not on one circle round "
+                        f"{_fmt(centre)}: they lie {radius:g} and {reach:g} from it."
+                    )
                 out = _unit(end[0] - centre[0], end[1] - centre[1])
                 end = (centre[0] + radius * out[0], centre[1] + radius * out[1])  # onto the circle, as asked
                 turn = _cross((here[0] - centre[0], here[1] - centre[1]), (end[0] - centre[0], end[1] - centre[1]))
-                if abs(turn) <= EXACT_MM * radius ** 2:
-                    raise SolidWorksError(f"Segment {k}: round {_fmt(centre)} from {_fmt(here)} to {_fmt(end)} is a "
-                                          "half circle either way; give a \"through\" point instead.")
+                if abs(turn) <= EXACT_MM * radius**2:
+                    raise SolidWorksError(
+                        f"Segment {k}: round {_fmt(centre)} from {_fmt(here)} to {_fmt(end)} is a "
+                        'half circle either way; give a "through" point instead.'
+                    )
                 direction = 1 if turn > 0 else -1
             elif "through" in segment:
                 middle = _point(segment["through"], f"Segment {k}'s through point")
                 turn = _cross((middle[0] - here[0], middle[1] - here[1]), (end[0] - middle[0], end[1] - middle[1]))
                 if abs(turn) <= EXACT_MM * max(1.0, math.dist(here, end)) ** 2:
-                    raise SolidWorksError(f"Segment {k}: {_fmt(here)}, {_fmt(middle)} and {_fmt(end)} lie in one "
-                                          "line; an arc needs a point off it.")
+                    raise SolidWorksError(
+                        f"Segment {k}: {_fmt(here)}, {_fmt(middle)} and {_fmt(end)} lie in one "
+                        "line; an arc needs a point off it."
+                    )
                 centre, direction = _circumcentre(here, middle, end), 1 if turn > 0 else -1
             else:
-                raise SolidWorksError(f"Segment {k}: an arc needs a \"through\" point, a \"center\" or \"tangent\": true.")
+                raise SolidWorksError(f'Segment {k}: an arc needs a "through" point, a "center" or "tangent": true.')
             index = add_point(end, last)
             entities.append(("arc", current, index, None, direction))
             centres.append((len(entities) - 1, centre))
@@ -201,8 +212,10 @@ def build_chain(start_mm, segments) -> Chain:
         kind, a, b, _, direction = entities[entity]
         entities[entity] = (kind, a, b, match, direction)
 
-    joints = [(k, k + 1, entities[k + 1][1] if entities[k + 1][0] != "spline" else entities[k + 1][1][0])
-              for k in range(len(entities) - 1)]
+    joints = [
+        (k, k + 1, entities[k + 1][1] if entities[k + 1][0] != "spline" else entities[k + 1][1][0])
+        for k in range(len(entities) - 1)
+    ]
     if closed and len(entities) > 1:
         joints.append((len(entities) - 1, 0, 0))
     told = {(a, b) for a, b, _ in smooth}
@@ -210,7 +223,12 @@ def build_chain(start_mm, segments) -> Chain:
         if (a, b) in told:
             continue
         before, after = _direction(points, entities[a], at), _direction(points, entities[b], at)
-        if before and after and abs(_cross(before, after)) <= EXACT_MM and before[0] * after[0] + before[1] * after[1] > 0:
+        if (
+            before
+            and after
+            and abs(_cross(before, after)) <= EXACT_MM
+            and before[0] * after[0] + before[1] * after[1] > 0
+        ):
             smooth.append((a, b, at))
     return Chain(points, entities, list(range(user)), closed, smooth)
 
@@ -221,6 +239,7 @@ class ChainPlan:
     entity), ("horizontal" | "vertical", entity), ("at_origin" | "origin_x" |
     "origin_y", point). dimensions: ("x" | "y", point, value) from the origin, or
     ("radius", entity, value)."""
+
     relations: list
     dimensions: list
     fully_defined: bool
@@ -296,8 +315,10 @@ def plan_chain(chain: Chain) -> ChainPlan:
     for kind, *rest in chain.entities:  # an arc keeps its ends at one radius
         if kind == "arc":
             s, e, c, _ = rest
-            keep([u(s), v(s), u(e), v(e), u(c), v(c)],
-                 lambda w: (w[0] - w[4]) ** 2 + (w[1] - w[5]) ** 2 - (w[2] - w[4]) ** 2 - (w[3] - w[5]) ** 2)
+            keep(
+                [u(s), v(s), u(e), v(e), u(c), v(c)],
+                lambda w: (w[0] - w[4]) ** 2 + (w[1] - w[5]) ** 2 - (w[2] - w[4]) ** 2 - (w[3] - w[5]) ** 2,
+            )
 
     relations = []
     for a, b, at in chain.smooth:
