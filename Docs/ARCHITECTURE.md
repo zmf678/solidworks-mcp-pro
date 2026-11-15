@@ -110,3 +110,10 @@ though the MCP server itself runs on an asyncio event loop.
   as it was.
 - `CommandInProgress` and the quiet-view guard are always restored, including on
   failure.
+
+## Further reading
+
+- [`ENGINEERING.md`](ENGINEERING.md): required checks and definition of done.
+- [`TESTING.md`](TESTING.md): test layers, commands and CI matrix.
+- [`RELEASING.md`](RELEASING.md): versioning and release process.
+- [`MAINTENANCE.md`](MAINTENANCE.md): dependency and upstream maintenance.

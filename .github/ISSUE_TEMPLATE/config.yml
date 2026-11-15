@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Engineering standards and definition of done
+    url: https://github.com/zmf678/solidworks-mcp-pro/blob/main/Docs/ENGINEERING.md
+    about: Read the required checks and contribution rules before opening a PR.
+  - name: Compatibility guide
+    url: https://github.com/zmf678/solidworks-mcp-pro/blob/main/Docs/COMPATIBILITY.md
+    about: Check supported versions and run the selftest first.
+  - name: Security report
+    url: https://github.com/zmf678/solidworks-mcp-pro/security/advisories/new
+    about: Report vulnerabilities privately, not in a public issue.
+  - name: Upstream project
+    url: https://github.com/hjbaard/SolidWorks-MCP
+    about: The original SolidWorks MCP project this fork is based on.

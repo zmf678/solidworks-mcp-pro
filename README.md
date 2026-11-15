@@ -9,6 +9,7 @@
 > [`UPSTREAM.md`](UPSTREAM.md).
 
 [![PyPI](https://img.shields.io/pypi/v/solidworks-mcp)](https://pypi.org/project/solidworks-mcp/)
+[![CI](https://github.com/zmf678/solidworks-mcp-pro/actions/workflows/ci.yml/badge.svg)](https://github.com/zmf678/solidworks-mcp-pro/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](https://github.com/zmf678/solidworks-mcp-pro/blob/main/LICENSE)
 
 Let an AI agent (Claude, or any other MCP client) model real parametric parts and
@@ -141,6 +142,21 @@ may still change. See [CHANGELOG.md](https://github.com/hjbaard/SolidWorks-MCP/b
 - **Only tested against SOLIDWORKS 2026 (3DEXPERIENCE R2026x).** On other builds the
   verified enum values or method signatures may differ — re-run
   `scripts/introspect_api.py` to inspect your installed typelib.
+
+## Documentation
+
+| Document | Audience | What it covers |
+|---|---|---|
+| [`Docs/README.md`](Docs/README.md) | everyone | Documentation index |
+| [`Docs/ENGINEERING.md`](Docs/ENGINEERING.md) | contributors | Standards, definition of done, module boundaries |
+| [`Docs/ARCHITECTURE.md`](Docs/ARCHITECTURE.md) | contributors | Request flow, layers, mixin composition, adding a tool |
+| [`Docs/TESTING.md`](Docs/TESTING.md) | contributors | Test layers, commands, coverage, CI matrix |
+| [`Docs/RELEASING.md`](Docs/RELEASING.md) | maintainers | Versioning, changelog, release and hotfix process |
+| [`Docs/COMPATIBILITY.md`](Docs/COMPATIBILITY.md) | users | Supported versions, selftest, compatibility reports |
+| [`Docs/MAINTENANCE.md`](Docs/MAINTENANCE.md) | maintainers | Upstream sync, dependencies, security, module ownership |
+| [`CONTRIBUTING.md`](CONTRIBUTING.md) | contributors | Development setup, checks, PR rules |
+| [`SECURITY.md`](SECURITY.md) | everyone | Private vulnerability reporting and scope |
+| [`UPSTREAM.md`](UPSTREAM.md) | maintainers | Fork relationship and upstream sync procedure |
 
 ## Development
 
@@ -388,7 +404,9 @@ Proven end-to-end against **SOLIDWORKS 2026 (3DEXPERIENCE R2026x)**:
 | M6 | assemblies: insert and position components, mate them, check interference — every placement and mate measured back ([tests/test_assembly.py](tests/test_assembly.py)) | ✅ |
 
 See [Docs/PROGRESS.md](Docs/PROGRESS.md) for the detailed log and roadmap.
-Feedback and contributions are welcome.
+Feedback and contributions are welcome. Read
+[`CONTRIBUTING.md`](CONTRIBUTING.md), then open an issue or a pull request. For
+security problems use the private reporting route in [`SECURITY.md`](SECURITY.md).
 
 ## Known limitations
 

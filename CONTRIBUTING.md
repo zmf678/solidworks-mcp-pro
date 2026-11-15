@@ -44,8 +44,8 @@ are intentionally local because GitHub runners do not have SolidWorks.
 - `tests/`: one test module per domain. Unit tests must not require SolidWorks;
   mark integration tests with `@pytest.mark.solidworks`.
 
-See `Docs/ARCHITECTURE.md` for the full module map and `Docs/ENGINEERING.md` for
-the definition of done.
+See `Docs/ARCHITECTURE.md` for the full module map, `Docs/TESTING.md` for the
+test strategy and `Docs/ENGINEERING.md` for the definition of done.
 
 ## Commit and branch style
 

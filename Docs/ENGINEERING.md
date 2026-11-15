@@ -162,7 +162,23 @@ lower the floor to make a change pass.
   publish workflow is kept for reference but guarded so it can only run in the
   upstream repository. A fork release is a GitHub release only.
 
-## 7. Known debt
+## 7. Documentation map
+
+| Document | Owns |
+|---|---|
+| `README.md` | user-facing install, tool overview, quickstart |
+| `Docs/README.md` | documentation index |
+| `Docs/ENGINEERING.md` | standards and definition of done |
+| `Docs/ARCHITECTURE.md` | layers, request flow, module map |
+| `Docs/TESTING.md` | test layers, commands, CI coverage |
+| `Docs/RELEASING.md` | versioning and release process |
+| `Docs/COMPATIBILITY.md` | supported platforms and selftest |
+| `Docs/MAINTENANCE.md` | upstream sync, dependencies, security, ownership |
+| `CONTRIBUTING.md` | development setup and PR rules |
+| `SECURITY.md` | private vulnerability reporting |
+| `UPSTREAM.md` | fork relationship and sync procedure |
+
+## 8. Known debt
 
 - Mypy currently covers the core modules only. The mixins are dynamically typed
   around COM and will need a Protocol/stub layer before whole-package checking.
@@ -170,8 +186,9 @@ lower the floor to make a change pass.
   are thin by design; logic lives in the session mixins.
 - Integration tests need a licensed, running SOLIDWORKS on Windows. They are not
   part of CI.
-- GitHub Free private repositories do not support rulesets/branch protection, so
-  required checks cannot be enforced server-side. CI is the merge gate by
-  convention; upgrade to GitHub Pro or make the repository public to enforce it.
+- The `main` branch is protected by the `main-protection` ruleset: a pull
+  request is required, the four CI jobs must pass on an up-to-date branch, and
+  deletion/force-push are blocked. The repository is public, so these protections
+  are enforced server-side.
 - Upstream merges require mapping changes from the old single `session.py` into
   the relevant mixin. See `UPSTREAM.md`.
