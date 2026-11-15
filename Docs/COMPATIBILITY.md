@@ -1,5 +1,7 @@
 # Compatibility
 
+**English** | [简体中文](zh-CN/COMPATIBILITY.md)
+
 ## Supported environment
 
 | Component | Supported | Notes |
@@ -15,21 +17,20 @@
 
 ## Selftest
 
-With SOLIDWORKS running:
+With SOLIDWORKS running, from this checkout:
 
 ```powershell
-uvx solidworks-mcp --selftest
+uv sync
+uv run solidworks-mcp --selftest
 ```
 
 The selftest reports the SOLIDWORKS release, language, templates and units, then
 builds small parts and an assembly, compares each with a hand calculation and
 closes them unsaved. Run it before reporting a compatibility problem.
 
-From a checkout:
-
-```powershell
-uv run python -m solidworks_mcp.server --selftest
-```
+If you are using the **upstream** PyPI package rather than this fork, the
+equivalent command is `uvx solidworks-mcp --selftest`; that command does not
+install this fork.
 
 ## Known compatibility limits
 
@@ -50,7 +51,7 @@ whether it passed or failed. Include:
 - SOLIDWORKS year, service pack and language;
 - Windows version;
 - Python version;
-- the exact `uvx`/`uv` command used;
+- the exact `uv run` or `uvx` command used;
 - the selftest output and any dialog that appeared.
 
 For a bug rather than a compatibility question, use the bug report template and

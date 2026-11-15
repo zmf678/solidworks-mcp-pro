@@ -1,5 +1,7 @@
 # Testing
 
+**English** | [简体中文](zh-CN/TESTING.md)
+
 The project has two test layers plus packaging and portability checks. The
 guiding rule is: **a modelling change is verified against a hand calculation,
 not against the shape "looking right".**

@@ -1,5 +1,8 @@
 # SolidWorks MCP — Progress log
 
+> 中文说明：本文是上游单文件时代的历史进度日志，保留英文原文。当前中文工程文档见
+> [`zh-CN/README.md`](zh-CN/README.md)。
+
 > Historical note: this log describes the upstream single-file era. The code has
 > since been split into `session/` domain mixins and `tools/` MCP wrappers; paths
 > mentioning `session.py` or `server.py` refer to the old layout.

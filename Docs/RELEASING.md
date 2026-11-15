@@ -1,5 +1,7 @@
 # Releasing
 
+**English** | [简体中文](zh-CN/RELEASING.md)
+
 This fork does **not** publish the upstream PyPI package or the public MCP
 Registry entry. A release here is a GitHub release with source and build
 artifacts. The upstream publish workflow is guarded and only runs in

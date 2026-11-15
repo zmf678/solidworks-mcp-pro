@@ -50,7 +50,7 @@ solidworks-mcp = "solidworks_mcp.server:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-solidworks_mcp = ["guide.md", "material_ids.json"]  # the guide resource; English material ids
+solidworks_mcp = ["guide.md", "guide.zh-CN.md", "material_ids.json"]  # guide resources; English material ids
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

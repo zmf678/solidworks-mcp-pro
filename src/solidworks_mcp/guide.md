@@ -3,6 +3,9 @@
 How to get parts out of this server that are right the first time. Read the
 short connect-time instructions first; this is the long version.
 
+> 中文版本：`solidworks://guide-zh`（源文件 `guide.zh-CN.md`）。本项目默认采用 GB
+> 建模与制图标准，ISO 为显式回退。
+
 ## 1. Coordinates and conventions
 
 - All lengths are **millimetres**, angles **degrees**. The server converts to

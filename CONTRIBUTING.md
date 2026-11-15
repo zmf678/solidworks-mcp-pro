@@ -1,18 +1,20 @@
 # Contributing
 
+**English** | [简体中文](CONTRIBUTING.zh-CN.md)
+
 Thanks for improving SolidWorks MCP. This is a Windows-first project: the unit
 suite runs anywhere, but integration tests need a licensed, running SOLIDWORKS.
 
 ## Development setup
 
 ```powershell
-git clone git@github.com:zmf678/solidworks-mcp-pro.git
+git clone https://github.com/zmf678/solidworks-mcp-pro.git
 cd solidworks-mcp-pro
 uv sync --extra dev
 ```
 
 All commands below assume the `uv` environment. To run the server from the
-checkout instead of `uvx`, point your MCP client at
+checkout instead of the console script, point your MCP client at
 `.venv\Scripts\python.exe -m solidworks_mcp.server`.
 
 ## Checks before opening a pull request

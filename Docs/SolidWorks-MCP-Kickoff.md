@@ -1,5 +1,8 @@
 # SolidWorks MCP Connector — Kickoff Brief
 
+> 中文说明：本文是上游原始设计简报（荷兰语），仅作历史参考。当前中文文档见
+> [`zh-CN/README.md`](zh-CN/README.md)。
+
 > Plak dit in een nieuwe Claude Code-sessie als startcontext. Het beschrijft *wat* we bouwen, *hoe* de architectuur eruitziet, een concrete eerste set tools, de verificatie-loop, en de bekende valkuilen — zodat je niet vanaf nul de SolidWorks-API hoeft te ontdekken.
 
 ## 1. Doel

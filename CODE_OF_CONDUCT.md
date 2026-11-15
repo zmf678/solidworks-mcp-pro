@@ -1,5 +1,7 @@
 # Code of conduct
 
+**English** | [简体中文](CODE_OF_CONDUCT.zh-CN.md)
+
 This project follows the
 [Contributor Covenant, version 2.1](https://www.contributor-covenant.org/version/2/1/code_of_conduct/).
 

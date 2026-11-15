@@ -46,6 +46,7 @@ Pitfalls
 - SolidWorks' memory grows in long sessions: on a low-memory warning, save and restart SolidWorks (never during a run).
 
 Read the resource solidworks://guide for the full guide: recipes (holes, ribs, threads, patterns, assemblies), 3D printing, and reverse-engineering a part from a mesh.
+中文用户可读 solidworks://guide-zh（中文建模指南，GB 标准与常用配方）。
 """
 
 mcp = FastMCP("solidworks-mcp", instructions=INSTRUCTIONS)
@@ -60,6 +61,16 @@ mcp = FastMCP("solidworks-mcp", instructions=INSTRUCTIONS)
 )
 def guide() -> str:
     return resources.files("solidworks_mcp").joinpath("guide.md").read_text(encoding="utf-8")
+
+
+@mcp.resource(
+    "solidworks://guide-zh",
+    name="guide-zh",
+    mime_type="text/markdown",
+    description="中文建模指南：GB 标准、约定、验证、常用配方、3D 打印和限制。",
+)
+def guide_zh() -> str:
+    return resources.files("solidworks_mcp").joinpath("guide.zh-CN.md").read_text(encoding="utf-8")
 
 
 class _NoSolidWorks:

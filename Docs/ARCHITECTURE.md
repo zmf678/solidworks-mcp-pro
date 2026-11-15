@@ -1,5 +1,7 @@
 # Architecture
 
+**English** | [简体中文](zh-CN/ARCHITECTURE.md)
+
 ## Request flow
 
 ```mermaid

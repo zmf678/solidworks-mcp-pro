@@ -1,5 +1,7 @@
 # Modelling standard: GB
 
+**English** | [简体中文](zh-CN/MODELING-STANDARDS.md)
+
 The default modelling and drawing standard for this fork is **GB** (中华人民共和国国家标准).
 ISO remains available as an explicit fallback where a GB table is not implemented
 or where a supplier requires ISO.

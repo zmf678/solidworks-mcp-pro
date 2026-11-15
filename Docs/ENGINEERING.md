@@ -1,5 +1,7 @@
 # Engineering standards
 
+**English** | [简体中文](zh-CN/ENGINEERING.md)
+
 This repository is an engineering-hardened fork of
 [`hjbaard/SolidWorks-MCP`](https://github.com/hjbaard/SolidWorks-MCP). The upstream
 project supplies the modelling engine and the tool surface; this fork adds the
