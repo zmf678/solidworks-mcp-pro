@@ -6,7 +6,6 @@ checks the result (see the guide). Pure Python, no SolidWorks.
 """
 
 import math
-import posixpath
 import struct
 import xml.etree.ElementTree as ET
 import zipfile
@@ -51,14 +50,17 @@ def _load_stl(path) -> list:
     if len(data) >= 84:
         count = struct.unpack_from("<I", data, 80)[0]
         if len(data) == 84 + 50 * count:  # binary: the size gives it away (ASCII may start with 'solid' too)
-            return [tuple(tuple(struct.unpack_from("<3f", data, 84 + 50 * k + 12 + 12 * j)) for j in range(3))
-                    for k in range(count)]
+            return [
+                tuple(tuple(struct.unpack_from("<3f", data, 84 + 50 * k + 12 + 12 * j)) for j in range(3))
+                for k in range(count)
+            ]
     text = data.decode("ascii")
-    vertices = [tuple(float(v) for v in line.split()[1:4]) for line in text.splitlines()
-                if line.strip().startswith("vertex")]
+    vertices = [
+        tuple(float(v) for v in line.split()[1:4]) for line in text.splitlines() if line.strip().startswith("vertex")
+    ]
     if not vertices or len(vertices) % 3:
         raise ValueError("no triangles found")
-    return [tuple(vertices[i:i + 3]) for i in range(0, len(vertices), 3)]
+    return [tuple(vertices[i : i + 3]) for i in range(0, len(vertices), 3)]
 
 
 def _parse_transform(text) -> tuple:
@@ -71,14 +73,20 @@ def _parse_transform(text) -> tuple:
 def _apply(m, p):
     """3MF transform: the point is a row vector times the 4x3 matrix."""
     x, y, z = p
-    return (x * m[0] + y * m[3] + z * m[6] + m[9], x * m[1] + y * m[4] + z * m[7] + m[10],
-            x * m[2] + y * m[5] + z * m[8] + m[11])
+    return (
+        x * m[0] + y * m[3] + z * m[6] + m[9],
+        x * m[1] + y * m[4] + z * m[7] + m[10],
+        x * m[2] + y * m[5] + z * m[8] + m[11],
+    )
 
 
 def _compose(inner, outer):
     """The transform applying `inner` first, then `outer`."""
-    return tuple(_apply(outer, (inner[i], inner[i + 1], inner[i + 2]))[j] - (outer[9 + j] if i < 9 else 0.0)
-                 for i in (0, 3, 6, 9) for j in range(3))
+    return tuple(
+        _apply(outer, (inner[i], inner[i + 1], inner[i + 2]))[j] - (outer[9 + j] if i < 9 else 0.0)
+        for i in (0, 3, 6, 9)
+        for j in range(3)
+    )
 
 
 def _load_3mf(path, frame: str) -> list:
@@ -95,14 +103,20 @@ def _load_3mf(path, frame: str) -> list:
             for obj in root.iter(f"{_3MF_CORE}object"):
                 mesh = obj.find(f"{_3MF_CORE}mesh")
                 if mesh is not None:
-                    verts = [(float(v.get("x")) * scale, float(v.get("y")) * scale, float(v.get("z")) * scale)
-                             for v in mesh.iter(f"{_3MF_CORE}vertex")]
-                    tris = [(int(t.get("v1")), int(t.get("v2")), int(t.get("v3")))
-                            for t in mesh.iter(f"{_3MF_CORE}triangle")]
+                    verts = [
+                        (float(v.get("x")) * scale, float(v.get("y")) * scale, float(v.get("z")) * scale)
+                        for v in mesh.iter(f"{_3MF_CORE}vertex")
+                    ]
+                    tris = [
+                        (int(t.get("v1")), int(t.get("v2")), int(t.get("v3")))
+                        for t in mesh.iter(f"{_3MF_CORE}triangle")
+                    ]
                     objects[obj.get("id")] = ("mesh", verts, tris)
                 else:
-                    comps = [(c.get(_3MF_PATH) or part, c.get("objectid"), _parse_transform(c.get("transform")))
-                             for c in obj.iter(f"{_3MF_CORE}component")]
+                    comps = [
+                        (c.get(_3MF_PATH) or part, c.get("objectid"), _parse_transform(c.get("transform")))
+                        for c in obj.iter(f"{_3MF_CORE}component")
+                    ]
                     objects[obj.get("id")] = ("components", comps, scale)
             models[part] = (root, objects)
         return models[part]
@@ -179,7 +193,7 @@ def section(triangles, axis: str, height: float) -> list:
             loop.append(current)
         if len(loop) > 2:
             loops.append(loop)
-    return sorted(loops, key=lambda l: -area(l))
+    return sorted(loops, key=lambda loop: -area(loop))
 
 
 def area(loop) -> float:
@@ -198,6 +212,7 @@ def compare_sections(reference, part) -> dict:
     A different area means a misread feature (a wall where the reference is
     hollow); equal areas with different extents mean a shifted frame.
     """
+
     def centre(loop):
         u0, u1, v0, v1 = extents(loop)
         return (u0 + u1) / 2, (v0 + v1) / 2
@@ -210,12 +225,14 @@ def compare_sections(reference, part) -> dict:
         k = min(free, key=lambda i: math.dist(centre(ref), centre(part[i])))
         free.remove(k)
         a_ref, a_part = area(ref), area(part[k])
-        pairs.append({
-            "reference_area_mm2": round(a_ref, 4),
-            "part_area_mm2": round(a_part, 4),
-            "area_diff_mm2": round(a_part - a_ref, 4),
-            "max_extent_diff_mm": round(max(abs(r - p) for r, p in zip(extents(ref), extents(part[k]))), 4),
-        })
+        pairs.append(
+            {
+                "reference_area_mm2": round(a_ref, 4),
+                "part_area_mm2": round(a_part, 4),
+                "area_diff_mm2": round(a_part - a_ref, 4),
+                "max_extent_diff_mm": round(max(abs(r - p) for r, p in zip(extents(ref), extents(part[k]))), 4),
+            }
+        )
     return {"pairs": pairs, "unmatched_reference": len(reference) - len(pairs), "unmatched_part": len(free)}
 
 

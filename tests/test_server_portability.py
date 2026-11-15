@@ -33,27 +33,43 @@ server.main()
 """
 
 _REQUESTS = [
-    {"jsonrpc": "2.0", "id": 1, "method": "initialize",
-     "params": {"protocolVersion": "2025-06-18", "capabilities": {},
-                "clientInfo": {"name": "introspection-probe", "version": "0"}}},
+    {
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "initialize",
+        "params": {
+            "protocolVersion": "2025-06-18",
+            "capabilities": {},
+            "clientInfo": {"name": "introspection-probe", "version": "0"},
+        },
+    },
     {"jsonrpc": "2.0", "method": "notifications/initialized"},
     {"jsonrpc": "2.0", "id": 2, "method": "tools/list"},
-    {"jsonrpc": "2.0", "id": 3, "method": "tools/call",
-     "params": {"name": "get_status", "arguments": {}}},
+    {"jsonrpc": "2.0", "id": 3, "method": "tools/call", "params": {"name": "get_status", "arguments": {}}},
 ]
 
 
 def _declared_tools():
-    source = pathlib.Path("src/solidworks_mcp/server.py").read_text(encoding="utf-8")
-    return sorted(node.name for node in ast.parse(source).body
-                  if isinstance(node, ast.AsyncFunctionDef) and node.decorator_list)
+    files = sorted(pathlib.Path("src/solidworks_mcp/tools").glob("*.py"))
+    return sorted(
+        node.name
+        for file in files
+        for node in ast.parse(file.read_text(encoding="utf-8")).body
+        if isinstance(node, ast.AsyncFunctionDef) and node.decorator_list
+    )
 
 
 def _exchange(requests, last_id, timeout=60):
     """Talk to the probe like a real client: keep stdin open until the reply to
     `last_id` arrives, then close it and wait for a clean exit."""
-    proc = subprocess.Popen([sys.executable, "-c", _PROBE], stdin=subprocess.PIPE,
-                            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    proc = subprocess.Popen(
+        [sys.executable, "-c", _PROBE],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        encoding="utf-8",
+    )
     replies, stderr, answered = {}, [], threading.Event()
 
     def read_replies():
@@ -91,8 +107,14 @@ def test_server_starts_without_pywin32_and_tools_fail_loud():
 
 def test_selftest_off_windows_says_why_it_cannot_run():
     probe = _PROBE.replace("server.main()", "sys.argv = ['solidworks-mcp', '--selftest']\nserver.main()")
-    run = subprocess.run([sys.executable, "-c", probe], stdin=subprocess.DEVNULL,
-                         capture_output=True, text=True, timeout=60)
+    run = subprocess.run(
+        [sys.executable, "-c", probe],
+        stdin=subprocess.DEVNULL,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        timeout=60,
+    )
 
     assert run.returncode == 1 and "only works on Windows" in run.stdout and "Traceback" not in run.stderr, (
         "a user who runs the selftest where it cannot work must read why, not get a stack trace: "

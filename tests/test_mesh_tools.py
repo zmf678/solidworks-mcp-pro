@@ -4,7 +4,6 @@ Reverse-engineering a part from a mesh starts with its cross-sections; these
 tests use meshes whose sections are known exactly.
 """
 
-import math
 import struct
 import zipfile
 
@@ -15,8 +14,20 @@ from solidworks_mcp.mesh_tools import compare_sections, load_mesh, section, simp
 
 # a 40 x 20 x 10 box from the origin, as 12 triangles
 _BOX_V = [(0, 0, 0), (40, 0, 0), (40, 20, 0), (0, 20, 0), (0, 0, 10), (40, 0, 10), (40, 20, 10), (0, 20, 10)]
-_BOX_T = [(0, 2, 1), (0, 3, 2), (4, 5, 6), (4, 6, 7), (0, 1, 5), (0, 5, 4),
-          (1, 2, 6), (1, 6, 5), (2, 3, 7), (2, 7, 6), (3, 0, 4), (3, 4, 7)]
+_BOX_T = [
+    (0, 2, 1),
+    (0, 3, 2),
+    (4, 5, 6),
+    (4, 6, 7),
+    (0, 1, 5),
+    (0, 5, 4),
+    (1, 2, 6),
+    (1, 6, 5),
+    (2, 3, 7),
+    (2, 7, 6),
+    (3, 0, 4),
+    (3, 4, 7),
+]
 BOX = [tuple(_BOX_V[i] for i in t) for t in _BOX_T]
 
 
@@ -46,22 +57,28 @@ def test_section_axes_give_the_other_two_coordinates():
 
 def _square_ring(outer, inner, height):
     """A closed (manifold) mesh of a square ring centred on the origin."""
+
     def square(s, z):
         h = s / 2
         return [(-h, -h, z), (h, -h, z), (h, h, z), (-h, h, z)]
+
     o0, o1, i0, i1 = square(outer, 0), square(outer, height), square(inner, 0), square(inner, height)
     tris = []
     for k in range(4):
         n = (k + 1) % 4
-        for a, b, c, d in ((o1[k], o1[n], i1[n], i1[k]), (o0[k], i0[k], i0[n], o0[n]),  # top, bottom
-                           (o0[k], o0[n], o1[n], o1[k]), (i0[k], i1[k], i1[n], i0[n])):  # outer, inner wall
+        for a, b, c, d in (
+            (o1[k], o1[n], i1[n], i1[k]),
+            (o0[k], i0[k], i0[n], o0[n]),  # top, bottom
+            (o0[k], o0[n], o1[n], o1[k]),
+            (i0[k], i1[k], i1[n], i0[n]),
+        ):  # outer, inner wall
             tris += [(a, b, c), (a, c, d)]
     return tris
 
 
 def test_section_through_a_hole_has_an_outer_and_an_inner_loop():
     loops = section(_square_ring(30, 10, 5), "z", 2.5)
-    assert sorted(round(_area(l), 6) for l in loops) == [100, 900]
+    assert sorted(round(_area(loop), 6) for loop in loops) == [100, 900]
 
 
 def test_sections_come_largest_first():
@@ -107,12 +124,16 @@ def test_3mf_component_transform_is_applied(tmp_path):
     verts = "".join(f'<vertex x="{x}" y="{y}" z="{z}"/>' for x, y, z in _BOX_V)
     tris = "".join(f'<triangle v1="{a}" v2="{b}" v3="{c}"/>' for a, b, c in _BOX_T)
     ns = 'xmlns="http://schemas.microsoft.com/3dmanufacturing/core/2015/02"'
-    part = f'<model {ns}><resources><object id="1" type="model"><mesh><vertices>{verts}</vertices>' \
-           f'<triangles>{tris}</triangles></mesh></object></resources></model>'
-    main = (f'<model {ns} xmlns:p="http://schemas.microsoft.com/3dmanufacturing/production/2015/06">'
-            '<resources><object id="2" type="model"><components>'
-            '<component p:path="/3D/Objects/object_1.model" objectid="1" transform="1 0 0 0 1 0 0 0 1 100 0 0"/>'
-            '</components></object></resources><build><item objectid="2"/></build></model>')
+    part = (
+        f'<model {ns}><resources><object id="1" type="model"><mesh><vertices>{verts}</vertices>'
+        f"<triangles>{tris}</triangles></mesh></object></resources></model>"
+    )
+    main = (
+        f'<model {ns} xmlns:p="http://schemas.microsoft.com/3dmanufacturing/production/2015/06">'
+        '<resources><object id="2" type="model"><components>'
+        '<component p:path="/3D/Objects/object_1.model" objectid="1" transform="1 0 0 0 1 0 0 0 1 100 0 0"/>'
+        '</components></object></resources><build><item objectid="2"/></build></model>'
+    )
     path = tmp_path / "box.3mf"
     with zipfile.ZipFile(path, "w") as z:
         z.writestr("3D/3dmodel.model", main)
@@ -150,6 +171,7 @@ def test_compare_counts_a_missing_loop():
 
 def test_session_slices_a_mesh_without_solidworks(tmp_path):
     from solidworks_mcp.session import SolidWorksSession
+
     path = tmp_path / "box.stl"
     _write_binary_stl(path, BOX)
     result = SolidWorksSession().slice_mesh(str(path), "z", [5.0, 20.0])
