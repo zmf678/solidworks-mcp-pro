@@ -170,5 +170,8 @@ lower the floor to make a change pass.
   are thin by design; logic lives in the session mixins.
 - Integration tests need a licensed, running SOLIDWORKS on Windows. They are not
   part of CI.
+- GitHub Free private repositories do not support rulesets/branch protection, so
+  required checks cannot be enforced server-side. CI is the merge gate by
+  convention; upgrade to GitHub Pro or make the repository public to enforce it.
 - Upstream merges require mapping changes from the old single `session.py` into
   the relevant mixin. See `UPSTREAM.md`.
