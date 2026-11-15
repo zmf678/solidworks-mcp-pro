@@ -1,5 +1,7 @@
 # Maintenance
 
+**English** | [简体中文](zh-CN/MAINTENANCE.md)
+
 ## Upstream sync
 
 This repository tracks [`hjbaard/SolidWorks-MCP`](https://github.com/hjbaard/SolidWorks-MCP).

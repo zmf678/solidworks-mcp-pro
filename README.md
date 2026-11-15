@@ -1,5 +1,7 @@
 # SolidWorks MCP
 
+**English** | [简体中文](README.zh-CN.md)
+
 > **Engineering-hardened fork.** This repository is a fork of
 > [`hjbaard/SolidWorks-MCP`](https://github.com/hjbaard/SolidWorks-MCP), focused on
 > modular architecture, reproducible development and CI. The modelling engine and
@@ -10,7 +12,6 @@
 > [`Docs/ARCHITECTURE.md`](Docs/ARCHITECTURE.md) and
 > [`UPSTREAM.md`](UPSTREAM.md).
 
-[![PyPI](https://img.shields.io/pypi/v/solidworks-mcp)](https://pypi.org/project/solidworks-mcp/)
 [![CI](https://github.com/zmf678/solidworks-mcp-pro/actions/workflows/ci.yml/badge.svg)](https://github.com/zmf678/solidworks-mcp-pro/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](https://github.com/zmf678/solidworks-mcp-pro/blob/main/LICENSE)
 
@@ -51,8 +52,9 @@ it "looks about right".
   `{ok: false, error}` with the cause, never silently wrong geometry.
 - **A fixed, typed tool surface.** There is no "run arbitrary code" tool; the
   agent can only do what the tools allow.
-- **Tested against real SolidWorks.** 754 tests; each feature's integration test
-  compares the result with a hand calculation.
+- **Tested against real SolidWorks.** Upstream reported 754 tests; this fork
+  adds CI, modularity guards and 401 unit tests, with 360 SolidWorks integration
+  tests for feature geometry and hand calculations.
 - **Local.** It talks to your running SolidWorks over COM; the server itself
   makes no network calls.
 
@@ -61,12 +63,20 @@ it "looks about right".
 1. Install [uv](https://docs.astral.sh/uv/getting-started/installation/).
 2. **Start SolidWorks** and leave it open (the server attaches to the running
    instance — it does not launch one).
-3. Register the server with your MCP client.
+3. Clone this fork and create the environment:
+
+   ```powershell
+   git clone https://github.com/zmf678/solidworks-mcp-pro.git
+   cd solidworks-mcp-pro
+   uv sync
+   ```
+
+4. Register the server with your MCP client.
 
    **Claude Code:**
 
-   ```bash
-   claude mcp add solidworks -- uvx solidworks-mcp
+   ```powershell
+   claude mcp add solidworks -- C:\path\to\solidworks-mcp-pro\.venv\Scripts\python.exe -m solidworks_mcp.server
    ```
 
    **Claude Desktop** (`claude_desktop_config.json`) or any other client:
@@ -75,18 +85,17 @@ it "looks about right".
    {
      "mcpServers": {
        "solidworks": {
-         "command": "uvx",
-         "args": ["solidworks-mcp"]
+         "command": "C:\\path\\to\\solidworks-mcp-pro\\.venv\\Scripts\\python.exe",
+         "args": ["-m", "solidworks_mcp.server"]
        }
      }
    }
    ```
 
-   It is also listed in the official
-   [MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.hjbaard/solidworks-mcp)
-   as `io.github.hjbaard/solidworks-mcp`.
+   This fork is **not** published to PyPI or the public MCP Registry.
+   `uvx solidworks-mcp` installs the upstream project, not this fork.
 
-4. Ask for a part, for example:
+5. Ask for a part, for example:
 
    > Design a 100 × 80 × 8 mm mounting plate with a Ø16 mm centre bore, four
    > counterbored M5 holes 12 mm from the corners and R5 corners. Check the
@@ -98,7 +107,9 @@ The server hands every MCP client short modelling guidelines when it connects
 (conventions, verify each step, known pitfalls). The full guide is the resource
 `solidworks://guide`: recipes for holes, ribs, threads and assemblies, 3D-print
 advice, and how to reverse-engineer a part from a mesh (STL/3MF). The same text
-is in [`src/solidworks_mcp/guide.md`](https://github.com/hjbaard/SolidWorks-MCP/blob/main/src/solidworks_mcp/guide.md).
+is in [`src/solidworks_mcp/guide.md`](src/solidworks_mcp/guide.md).
+The Chinese guide is the `solidworks://guide-zh` resource
+([`src/solidworks_mcp/guide.zh-CN.md`](src/solidworks_mcp/guide.zh-CN.md)).
 
 ## Requirements and compatibility
 
@@ -114,23 +125,23 @@ is in [`src/solidworks_mcp/guide.md`](https://github.com/hjbaard/SolidWorks-MCP/
   exist since SOLIDWORKS 2020 SP2, so 2020–2025 should work, but that is
   **untested**. To check your installation, run this with SolidWorks open:
 
-  ```bash
-  uvx solidworks-mcp --selftest
+  ```powershell
+  uv run solidworks-mcp --selftest
   ```
 
   It builds a few small parts, compares each with a hand calculation and
   closes them unsaved. Please paste its output in a
-  [compatibility report](https://github.com/hjbaard/SolidWorks-MCP/issues/new?template=compatibility.yml),
+  [compatibility report](https://github.com/zmf678/solidworks-mcp-pro/issues/new?template=compatibility.yml),
   whether it worked or not.
 
 **Status: early (0.x).** It works end-to-end, but tool names and conventions
-may still change. See [CHANGELOG.md](https://github.com/hjbaard/SolidWorks-MCP/blob/main/CHANGELOG.md).
+may still change. See [CHANGELOG.md](CHANGELOG.md).
 
 ## Troubleshooting
 
-- **Start with the selftest**: `uvx solidworks-mcp --selftest` shows your
+- **Start with the selftest**: `uv run solidworks-mcp --selftest` shows your
   SolidWorks release, language and templates, and which tool areas work. Add
-  its output to a [bug report](https://github.com/hjbaard/SolidWorks-MCP/issues/new?template=bug_report.yml).
+  its output to a [bug report](https://github.com/zmf678/solidworks-mcp-pro/issues/new?template=bug_report.yml).
 - **"No running SolidWorks found" / connection fails** — SolidWorks must be
   *running* before you start the server or run a script; it attaches to the active
   instance via `GetActiveObject` and does not launch one.
@@ -149,6 +160,8 @@ may still change. See [CHANGELOG.md](https://github.com/hjbaard/SolidWorks-MCP/b
 
 | Document | Audience | What it covers |
 |---|---|---|
+| [`README.zh-CN.md`](README.zh-CN.md) | 中文读者 | 中文项目说明、快速开始、GB 标准 |
+| [`Docs/zh-CN/README.md`](Docs/zh-CN/README.md) | 中文读者 | 中文文档索引 |
 | [`Docs/README.md`](Docs/README.md) | everyone | Documentation index |
 | [`Docs/ENGINEERING.md`](Docs/ENGINEERING.md) | contributors | Standards, definition of done, module boundaries |
 | [`Docs/MODELING-STANDARDS.md`](Docs/MODELING-STANDARDS.md) | everyone | GB modelling/drawing standard, mapping, non-claims |
@@ -169,8 +182,8 @@ Clone the repository, then create the pinned environment:
 uv sync --extra dev
 ```
 
-To run the MCP server from this checkout instead of via uvx, point your client
-at the venv's Python:
+To run the MCP server from this checkout instead of the console script, point
+your client at the venv's Python:
 
 ```json
 {

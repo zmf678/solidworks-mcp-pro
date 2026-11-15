@@ -1,5 +1,7 @@
 # Upstream relationship
 
+**English** | [简体中文](UPSTREAM.zh-CN.md)
+
 This repository is a **fork** of
 [`hjbaard/SolidWorks-MCP`](https://github.com/hjbaard/SolidWorks-MCP), created
 from upstream `main` at commit `58ca7bf` (`v0.20.0`, 2026-11-13).

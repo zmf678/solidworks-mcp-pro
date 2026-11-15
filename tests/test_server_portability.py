@@ -129,17 +129,24 @@ def test_server_hands_every_client_its_guidelines():
     requests = _REQUESTS[:2] + [
         {"jsonrpc": "2.0", "id": 4, "method": "resources/list"},
         {"jsonrpc": "2.0", "id": 5, "method": "resources/read", "params": {"uri": "solidworks://guide"}},
+        {"jsonrpc": "2.0", "id": 6, "method": "resources/read", "params": {"uri": "solidworks://guide-zh"}},
     ]
-    replies, returncode, stderr = _exchange(requests, last_id=5)
+    replies, returncode, stderr = _exchange(requests, last_id=6)
 
-    assert returncode == 0 and 5 in replies, f"the server did not answer:\n{stderr}"
+    assert returncode == 0 and 6 in replies, f"the server did not answer:\n{stderr}"
     instructions = replies[1]["result"].get("instructions") or ""
     assert "solidworks://guide" in instructions and "+z:inner" in instructions, (
         f"the connect-time instructions miss the conventions or the pointer to the guide: {instructions!r}"
     )
+    assert "solidworks://guide-zh" in instructions, "the connect-time instructions do not mention the Chinese guide"
     listed = [r["uri"] for r in replies[4]["result"]["resources"]]
     assert "solidworks://guide" in listed, f"the guide is not listed as a resource: {listed}"
+    assert "solidworks://guide-zh" in listed, f"the Chinese guide is not listed as a resource: {listed}"
     guide = replies[5]["result"]["contents"][0]["text"]
     assert guide.startswith("# ") and "reverse-engineer" in guide.lower(), (
         "the guide resource is empty or not the modelling guide"
+    )
+    guide_zh = replies[6]["result"]["contents"][0]["text"]
+    assert guide_zh.startswith("# ") and "GB" in guide_zh, (
+        "the Chinese guide resource is empty or does not mention the GB standard"
     )

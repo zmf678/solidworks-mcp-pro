@@ -1,5 +1,7 @@
 # Documentation
 
+**English** | [简体中文](zh-CN/README.md)
+
 This directory contains the engineering and maintenance documentation for the
 SolidWorks MCP fork. The README is the user-facing entry point; these documents
 are for contributors, reviewers and maintainers.
@@ -8,6 +10,7 @@ are for contributors, reviewers and maintainers.
 
 | Document | Audience | What it covers |
 |---|---|---|
+| [`zh-CN/README.md`](zh-CN/README.md) | 中文读者 | 中文文档索引与核心工程文档 |
 | [`ENGINEERING.md`](ENGINEERING.md) | everyone | Non-negotiable principles, required checks, definition of done, module boundaries, testing and release standards |
 | [`MODELING-STANDARDS.md`](MODELING-STANDARDS.md) | everyone | GB modelling and drawing standard, normative basis, implementation matrix, non-claims |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | contributors | Request flow, layer responsibilities, session mixin composition, state ownership, adding a tool |

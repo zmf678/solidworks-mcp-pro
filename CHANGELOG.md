@@ -6,6 +6,10 @@ All notable changes to this project are documented here. This project follows
 ## [Unreleased] — engineering hardening
 
 ### Added
+- Chinese documentation: `README.zh-CN.md`, `Docs/zh-CN/` (engineering, GB
+  standard, architecture, testing, compatibility, maintenance, releasing),
+  `CONTRIBUTING.zh-CN.md`, `SECURITY.zh-CN.md`, `UPSTREAM.zh-CN.md`, and a
+  `solidworks://guide-zh` Chinese modelling-guide resource.
 - Public documentation set: `Docs/README.md` index, `Docs/TESTING.md`,
   `Docs/RELEASING.md`, `Docs/COMPATIBILITY.md`, `Docs/MAINTENANCE.md`,
   `Docs/MODELING-STANDARDS.md` and issue-template contact links.
@@ -15,6 +19,9 @@ All notable changes to this project are documented here. This project follows
   `.drwdot` for a GB title block.
 
 ### Changed
+- README quickstart now installs this fork from a local checkout with `uv sync`;
+  the upstream PyPI badge and MCP Registry install claim were removed. Clone
+  URLs use HTTPS for public access.
 - **GB is now the default modelling and drawing standard.** `add_hole_wizard`
   uses SolidWorks' GB tables by default (GB/T 5277 clearance, GB/T 70.1
   counterbore, GB/T 70.3 countersink, GB tapped holes); pass `standard="ISO"`

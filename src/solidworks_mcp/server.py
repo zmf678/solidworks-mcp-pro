@@ -16,6 +16,7 @@ from .app import (
     _session,
     _worker,
     guide,
+    guide_zh,
     mcp,
 )
 from .selftest import main as run_selftest
@@ -175,6 +176,7 @@ __all__ = [
     "get_mass_properties",
     "get_status",
     "guide",
+    "guide_zh",
     "insert_component",
     "list_bodies",
     "list_components",
