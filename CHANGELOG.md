@@ -5,6 +5,13 @@ All notable changes to this project are documented here. This project follows
 
 ## [Unreleased] — engineering hardening
 
+### Added
+- Public documentation set: `Docs/README.md` index, `Docs/TESTING.md`,
+  `Docs/RELEASING.md`, `Docs/COMPATIBILITY.md`, `Docs/MAINTENANCE.md` and
+  issue-template contact links.
+- A `main-protection` ruleset requiring the four CI jobs and a pull request
+  before merging; deletion and force-push of `main` are blocked.
+
 ### Changed
 - Split the 6,646-line `session.py` (346 methods) into a `session/` package of
   23 domain mixins. `SolidWorksSession` keeps the same public class, method names
