@@ -41,6 +41,8 @@ handling, injection, secret-handling or denial-of-service issues privately.
 ## Dependency and release hygiene
 
 - Dependencies are pinned in `uv.lock`; Dependabot watches `pyproject.toml` and
-  GitHub Actions.
+  GitHub Actions, and Dependabot security updates are enabled.
+- Secret scanning and secret-scanning push protection are enabled on the public
+  repository.
 - CI runs lint, type checks, unit tests and a package build on every PR.
 - This fork does not publish to PyPI or the public MCP Registry.
