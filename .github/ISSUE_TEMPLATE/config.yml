@@ -1,17 +1,17 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Engineering standards and definition of done
-    url: https://github.com/zmf678/solidworks-mcp-pro/blob/main/Docs/ENGINEERING.md
-    about: Read the required checks and contribution rules before opening a PR.
-  - name: GB modelling standard
-    url: https://github.com/zmf678/solidworks-mcp-pro/blob/main/Docs/MODELING-STANDARDS.md
-    about: Read the GB default, implementation matrix and non-claims.
-  - name: Compatibility guide
-    url: https://github.com/zmf678/solidworks-mcp-pro/blob/main/Docs/COMPATIBILITY.md
-    about: Check supported versions and run the selftest first.
-  - name: Security report
+  - name: Engineering standards / 工程标准
+    url: https://github.com/zmf678/solidworks-mcp-pro/blob/main/Docs/zh-CN/ENGINEERING.md
+    about: Required checks and definition of done. / 提交前阅读必需检查和完成定义。
+  - name: GB modelling standard / GB 建模标准
+    url: https://github.com/zmf678/solidworks-mcp-pro/blob/main/Docs/zh-CN/MODELING-STANDARDS.md
+    about: GB default, implementation matrix and non-claims. / GB 默认、实现矩阵与非声明。
+  - name: Compatibility guide / 兼容性指南
+    url: https://github.com/zmf678/solidworks-mcp-pro/blob/main/Docs/zh-CN/COMPATIBILITY.md
+    about: Supported versions and selftest. / 支持版本与自检。
+  - name: Security report / 安全报告
     url: https://github.com/zmf678/solidworks-mcp-pro/security/advisories/new
-    about: Report vulnerabilities privately, not in a public issue.
-  - name: Upstream project
+    about: Report vulnerabilities privately, not in a public issue. / 请私下报告漏洞，不要开公开 Issue。
+  - name: Upstream project / 上游项目
     url: https://github.com/hjbaard/SolidWorks-MCP
-    about: The original SolidWorks MCP project this fork is based on.
+    about: The original SolidWorks MCP project this fork is based on. / 本分支所基于的原始项目。

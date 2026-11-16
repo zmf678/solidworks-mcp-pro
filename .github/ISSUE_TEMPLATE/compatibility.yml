@@ -1,6 +1,6 @@
-name: Compatibility report
-description: Does it work with your SolidWorks? Tell us either way.
-title: "Compatibility: SOLIDWORKS <year>, <language>"
+name: Compatibility report / 兼容性报告
+description: Does it work with your SolidWorks? Tell us either way. / 在你的 SolidWorks 上能用吗？成功或失败都欢迎反馈。
+title: "Compatibility / 兼容性: SOLIDWORKS <year>, <language>"
 body:
   - type: markdown
     attributes:
@@ -9,30 +9,37 @@ body:
         With SolidWorks open, run this in a terminal and paste its output below:
 
         ```
-        uvx solidworks-mcp --selftest
+        uv run solidworks-mcp --selftest
         ```
 
-        It builds a few small parts, compares each with a hand calculation and closes them without saving.
+        If you use the upstream package instead of this fork, the equivalent command is
+        `uvx solidworks-mcp --selftest`.
+
+        目前只验证了 SOLIDWORKS 2026，所以每份报告都有帮助，"直接能用"也包括在内。
+        在 SolidWorks 打开时，在仓库目录运行上面的 `uv run` 命令并粘贴输出；若使用
+        上游包，对应命令是 `uvx solidworks-mcp --selftest`。
+
+        它会创建几个小零件，与手算对比后不保存关闭。
   - type: dropdown
     id: result
     attributes:
-      label: Result
+      label: Result / 结果
       options:
-        - All checks passed
-        - Some checks failed
-        - It could not connect to SolidWorks
+        - All checks passed / 全部通过
+        - Some checks failed / 部分失败
+        - It could not connect to SolidWorks / 无法连接 SolidWorks
     validations:
       required: true
   - type: textarea
     id: selftest
     attributes:
-      label: Selftest output
-      description: The full output of `uvx solidworks-mcp --selftest`.
+      label: Selftest output / 自检输出
+      description: The full output of `uv run solidworks-mcp --selftest`. / `uv run solidworks-mcp --selftest` 的完整输出。
       render: text
     validations:
       required: true
   - type: textarea
     id: notes
     attributes:
-      label: Anything else
-      description: Your MCP client, what you built with it, what worked or did not.
+      label: Anything else / 其他信息
+      description: Your MCP client, what you built with it, what worked or did not. / 你的 MCP 客户端、用它做了什么、哪些能用/不能用。

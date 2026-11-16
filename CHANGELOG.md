@@ -19,6 +19,9 @@ All notable changes to this project are documented here. This project follows
   `.drwdot` for a GB title block.
 
 ### Changed
+- Issue and PR templates are now bilingual (English/Chinese) and use the fork's
+  `uv run solidworks-mcp --selftest` command; `uvx` is explained only as the
+  upstream-package alternative.
 - README quickstart now installs this fork from a local checkout with `uv sync`;
   the upstream PyPI badge and MCP Registry install claim were removed. Clone
   URLs use HTTPS for public access.

@@ -1,26 +1,33 @@
-name: Bug report
-description: A tool fails, or builds the wrong geometry.
+name: Bug report / 缺陷报告
+description: A tool fails, or builds the wrong geometry. / 工具失败或几何错误。
 labels: ["bug"]
 body:
   - type: textarea
     id: what
     attributes:
-      label: What happened
+      label: What happened / 发生了什么
       description: |
         The tool call or your request to the agent, what you expected, and what you got.
         Paste the error message if there was one; a screenshot of the part helps.
+        / 请写明工具调用或给 Agent 的请求、预期结果和实际结果；有错误信息请粘贴，
+        零件截图也有帮助。
     validations:
       required: true
   - type: textarea
     id: selftest
     attributes:
-      label: Selftest output
-      description: With SolidWorks open, run `uvx solidworks-mcp --selftest` in a terminal and paste its output.
+      label: Selftest output / 自检输出
+      description: |
+        With SolidWorks open, run `uv run solidworks-mcp --selftest` in the repository
+        and paste its output. If you use the upstream package, `uvx solidworks-mcp
+        --selftest` is the equivalent command.
+        / 在仓库目录、SolidWorks 打开时运行 `uv run solidworks-mcp --selftest`，
+        并粘贴输出。若使用上游包，对应命令是 `uvx solidworks-mcp --selftest`。
       render: text
     validations:
       required: true
   - type: input
     id: client
     attributes:
-      label: MCP client
+      label: MCP client / MCP 客户端
       placeholder: Claude Desktop, Claude Code, Cursor, ...
