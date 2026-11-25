@@ -3,7 +3,9 @@
 All notable changes to this project are documented here. This project follows
 [Semantic Versioning](https://semver.org/).
 
-## [Unreleased] — engineering hardening
+## [Unreleased]
+
+## [0.21.0] — 2026-11-25
 
 ### Added
 - Chinese documentation: `README.zh-CN.md`, `Docs/zh-CN/` (engineering, GB
@@ -17,8 +19,14 @@ All notable changes to this project are documented here. This project follows
   before merging; deletion and force-push of `main` are blocked.
 - `make_drawing(path, template=...)` accepts a drawing template; pass a GB
   `.drwdot` for a GB title block.
+- English and Chinese troubleshooting instructions for drawing slowdowns,
+  missing dimensions, or freezes linked to Enhanced graphics performance.
 
 ### Changed
+- A tool that temporarily activates its document for modelling, export, or a
+  screenshot restores the previously active SolidWorks document after success
+  or failure, if that document is still open. Explicit `activate_document`
+  calls still keep the requested document active.
 - Issue and PR templates are now bilingual (English/Chinese) and use the fork's
   `uv run solidworks-mcp --selftest` command; `uvx` is explained only as the
   upstream-package alternative.
