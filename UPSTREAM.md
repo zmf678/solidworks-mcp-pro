@@ -5,6 +5,7 @@
 This repository is a **fork** of
 [`hjbaard/SolidWorks-MCP`](https://github.com/hjbaard/SolidWorks-MCP), created
 from upstream `main` at commit `58ca7bf` (`v0.20.0`, 2026-11-13).
+The latest upstream sync includes `0dd7851` (`v0.21.0` and its drawing troubleshooting update).
 
 ## What comes from upstream
 
@@ -17,7 +18,7 @@ from upstream `main` at commit `58ca7bf` (`v0.20.0`, 2026-11-13).
 ## What this fork adds
 
 - A domain-modular `session/` package (the upstream single `session.py` is split
-  into mixins; method bodies are unchanged).
+  into mixins).
 - PR CI (lint, format, mypy, unit tests, package build), Dependabot, coverage
   reporting and a reproducible `uv.lock`.
 - Engineering standards, architecture docs, contribution/security templates.
@@ -36,7 +37,7 @@ upstream/main` will conflict. The practical workflow is:
 ```powershell
 git fetch upstream
 git log --oneline HEAD..upstream/main
-git diff HEAD..upstream/main -- src/solidworks_mcp/session.py
+git diff HEAD...upstream/main -- src/solidworks_mcp/session.py
 ```
 
 Then:

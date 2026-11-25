@@ -4,8 +4,8 @@
 
 > **工程化增强分支。** 本仓库是
 > [`hjbaard/SolidWorks-MCP`](https://github.com/hjbaard/SolidWorks-MCP) 的 fork，
-> 重点做模块化、可复现开发环境、CI 和工程文档。建模内核与工具面来自上游，
-> 方法体保持原样；默认建模与制图标准为 **GB（中国国家标准）**，ISO 作为显式回退。
+> 重点做模块化、可复现开发环境、CI 和工程文档。建模内核与工具面来自上游。
+> 默认建模与制图标准为 **GB（中国国家标准）**，ISO 作为显式回退。
 >
 > 本 fork **不发布到 PyPI 或公共 MCP Registry**。`uvx solidworks-mcp` 安装的是
 > 上游项目，不是本仓库。
@@ -176,6 +176,8 @@ uv run mypy
 - **先跑自检**：`uv run solidworks-mcp --selftest` 会显示 SolidWorks 版本、
   语言、模板和可用工具区域。把输出贴到
   [Bug 报告](https://github.com/zmf678/solidworks-mcp-pro/issues/new?template=bug_report.yml)。
+- **多次生成工程图后变慢、缺少尺寸标注或卡死。** 在「工具 > 选项 > 系统选项 > 性能」中
+  关闭「增强图形性能」（Enhanced graphics performance），然后重启 SolidWorks。
 - **提示找不到 SolidWorks**：SolidWorks 必须已经在运行；服务通过
   `GetActiveObject` 附加，不会启动新实例。
 - **第一次调用很慢 / `EnsureModule` 报错**：首次 COM 调用会生成 `gen_py`

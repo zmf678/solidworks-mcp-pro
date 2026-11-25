@@ -5,7 +5,7 @@
 > **Engineering-hardened fork.** This repository is a fork of
 > [`hjbaard/SolidWorks-MCP`](https://github.com/hjbaard/SolidWorks-MCP), focused on
 > modular architecture, reproducible development and CI. The modelling engine and
-> tool surface come from upstream; method bodies are unchanged. The default
+> tool surface come from upstream. The default
 > modelling and drawing standard is **GB** (Chinese national standards), with ISO
 > as an explicit fallback. See [`Docs/MODELING-STANDARDS.md`](Docs/MODELING-STANDARDS.md),
 > [`Docs/ENGINEERING.md`](Docs/ENGINEERING.md),
@@ -52,9 +52,9 @@ it "looks about right".
   `{ok: false, error}` with the cause, never silently wrong geometry.
 - **A fixed, typed tool surface.** There is no "run arbitrary code" tool; the
   agent can only do what the tools allow.
-- **Tested against real SolidWorks.** Upstream reported 754 tests; this fork
-  adds CI, modularity guards and 401 unit tests, with 360 SolidWorks integration
-  tests for feature geometry and hand calculations.
+- **Verified geometry.** The test suite includes SolidWorks integration tests
+  that compare feature geometry with hand calculations, plus CI for the unit
+  suite, modularity checks, and packaging.
 - **Local.** It talks to your running SolidWorks over COM; the server itself
   makes no network calls.
 
@@ -142,6 +142,9 @@ may still change. See [CHANGELOG.md](CHANGELOG.md).
 - **Start with the selftest**: `uv run solidworks-mcp --selftest` shows your
   SolidWorks release, language and templates, and which tool areas work. Add
   its output to a [bug report](https://github.com/zmf678/solidworks-mcp-pro/issues/new?template=bug_report.yml).
+- **Drawings slow down, lose dimensions, or freeze after repeated calls.**
+  Disable *Enhanced graphics performance* under Tools > Options > System
+  Options > Performance, then restart SolidWorks.
 - **"No running SolidWorks found" / connection fails** — SolidWorks must be
   *running* before you start the server or run a script; it attaches to the active
   instance via `GetActiveObject` and does not launch one.

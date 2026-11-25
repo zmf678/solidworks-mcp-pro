@@ -4,6 +4,7 @@
 
 本仓库是 [`hjbaard/SolidWorks-MCP`](https://github.com/hjbaard/SolidWorks-MCP)
 的 **fork**，基于上游 `main` 的提交 `58ca7bf`（`v0.20.0`，2026-11-13）创建。
+最近一次同步纳入上游提交 `0dd7851`，包含 `v0.21.0` 和其后的工程图排查说明。
 
 ## 来自上游的内容
 
@@ -13,7 +14,7 @@
 
 ## 本分支增加的内容
 
-- 领域模块化的 `session/` 包（上游单文件 `session.py` 拆成 Mixin，方法体不变）；
+- 领域模块化的 `session/` 包（将上游单文件 `session.py` 拆成 Mixin）；
 - PR CI（lint、格式、mypy、单测、打包）、Dependabot、覆盖率报告和 `uv.lock`；
 - 工程标准、架构文档、贡献/安全模板；
 - fork 安全保护：上游 publish workflow 不能从本仓库发布；
@@ -29,7 +30,7 @@
 ```powershell
 git fetch upstream
 git log --oneline HEAD..upstream/main
-git diff HEAD..upstream/main -- src/solidworks_mcp/session.py
+git diff HEAD...upstream/main -- src/solidworks_mcp/session.py
 ```
 
 然后：
